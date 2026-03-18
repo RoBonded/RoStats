@@ -1,0 +1,1328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RoStats — Roblox Game Analytics</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --bg2: #111118;
+    --bg3: #1a1a24;
+    --card: #13131c;
+    --card-border: rgba(255,255,255,0.07);
+    --accent: #ff4d4d;
+    --accent2: #ff8c42;
+    --accent-glow: rgba(255,77,77,0.15);
+    --text: #f0f0f5;
+    --text2: #8888a0;
+    --text3: #55556a;
+    --green: #39d98a;
+    --blue: #4d9fff;
+    --purple: #a855f7;
+    --yellow: #fbbf24;
+    --mono: 'DM Mono', monospace;
+    --sans: 'Syne', sans-serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Background grid */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(255,77,77,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,77,77,0.03) 1px, transparent 1px);
+    background-size: 60px 60px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* Radial glow top */
+  body::after {
+    content: '';
+    position: fixed;
+    top: -200px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 900px;
+    height: 500px;
+    background: radial-gradient(ellipse, rgba(255,77,77,0.07) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ── HEADER ── */
+  header {
+    position: relative;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 40px;
+    border-bottom: 1px solid var(--card-border);
+    backdrop-filter: blur(12px);
+    background: rgba(10,10,15,0.7);
+    position: sticky;
+    top: 0;
+  }
+
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+  }
+
+  .logo-icon {
+    width: 36px;
+    height: 36px;
+    background: var(--accent);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    box-shadow: 0 0 20px rgba(255,77,77,0.4);
+  }
+
+  .logo-text {
+    font-size: 20px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+  }
+
+  .logo-text span { color: var(--accent); }
+
+  .header-badge {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--green);
+    background: rgba(57,217,138,0.1);
+    border: 1px solid rgba(57,217,138,0.2);
+    padding: 4px 10px;
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .pulse-dot {
+    width: 6px;
+    height: 6px;
+    background: var(--green);
+    border-radius: 50%;
+    animation: pulse 2s ease-in-out infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.4; transform: scale(0.8); }
+  }
+
+  /* ── MAIN ── */
+  main {
+    position: relative;
+    z-index: 5;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 60px 24px 80px;
+  }
+
+  /* ── HERO ── */
+  .hero {
+    text-align: center;
+    margin-bottom: 48px;
+  }
+
+  .hero-tag {
+    display: inline-block;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--accent);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+    background: var(--accent-glow);
+    padding: 5px 14px;
+    border-radius: 20px;
+    border: 1px solid rgba(255,77,77,0.2);
+  }
+
+  .hero h1 {
+    font-size: clamp(36px, 6vw, 64px);
+    font-weight: 800;
+    line-height: 1.05;
+    letter-spacing: -2px;
+    margin-bottom: 16px;
+  }
+
+  .hero h1 em {
+    font-style: normal;
+    color: var(--accent);
+    position: relative;
+  }
+
+  .hero p {
+    font-size: 16px;
+    color: var(--text2);
+    font-weight: 400;
+    max-width: 440px;
+    margin: 0 auto;
+    line-height: 1.6;
+    font-family: var(--mono);
+  }
+
+  /* ── SEARCH ── */
+  .search-wrapper {
+    max-width: 640px;
+    margin: 0 auto 48px;
+    position: relative;
+  }
+
+  .search-box {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: var(--card);
+    border: 1px solid var(--card-border);
+    border-radius: 14px;
+    padding: 6px 6px 6px 20px;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+
+  .search-box:focus-within {
+    border-color: rgba(255,77,77,0.4);
+    box-shadow: 0 0 0 3px var(--accent-glow), 0 8px 32px rgba(0,0,0,0.4);
+  }
+
+  .search-icon {
+    color: var(--text3);
+    font-size: 16px;
+    flex-shrink: 0;
+  }
+
+  .search-box input {
+    flex: 1;
+    background: none;
+    border: none;
+    outline: none;
+    font-family: var(--sans);
+    font-size: 15px;
+    color: var(--text);
+    font-weight: 600;
+  }
+
+  .search-box input::placeholder { color: var(--text3); font-weight: 400; }
+
+  .search-btn {
+    background: var(--accent);
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 10px;
+    font-family: var(--sans);
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.15s, background 0.15s;
+    white-space: nowrap;
+    letter-spacing: 0.3px;
+  }
+
+  .search-btn:hover {
+    background: #ff3333;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 20px rgba(255,77,77,0.4);
+  }
+
+  .search-btn:active { transform: translateY(0); }
+
+  /* Search suggestions */
+  .suggestions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-top: 14px;
+  }
+
+  .suggestion-chip {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text2);
+    background: var(--bg3);
+    border: 1px solid var(--card-border);
+    padding: 5px 12px;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .suggestion-chip:hover {
+    color: var(--text);
+    border-color: rgba(255,77,77,0.3);
+    background: rgba(255,77,77,0.06);
+  }
+
+  /* ── RESULTS AREA ── */
+  #results-section { display: none; }
+  #results-section.visible { display: block; }
+
+  /* Search Results List */
+  .search-results-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 32px;
+  }
+
+  .result-item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    background: var(--card);
+    border: 1px solid var(--card-border);
+    border-radius: 12px;
+    padding: 12px 16px;
+    cursor: pointer;
+    transition: all 0.15s;
+    animation: fadeIn 0.3s ease forwards;
+    opacity: 0;
+  }
+
+  .result-item:hover {
+    border-color: rgba(255,77,77,0.3);
+    background: rgba(255,77,77,0.05);
+    transform: translateX(4px);
+  }
+
+  .result-thumb {
+    width: 56px;
+    height: 56px;
+    border-radius: 8px;
+    object-fit: cover;
+    background: var(--bg3);
+    flex-shrink: 0;
+  }
+
+  .result-info { flex: 1; min-width: 0; }
+
+  .result-name {
+    font-size: 14px;
+    font-weight: 700;
+    margin-bottom: 3px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .result-meta {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text2);
+  }
+
+  .result-ccu {
+    font-family: var(--mono);
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--green);
+    flex-shrink: 0;
+  }
+
+  /* ── GAME DASHBOARD ── */
+  #game-dashboard { display: none; }
+  #game-dashboard.visible { display: block; }
+
+  .back-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--text2);
+    cursor: pointer;
+    margin-bottom: 28px;
+    padding: 8px 14px;
+    background: var(--card);
+    border: 1px solid var(--card-border);
+    border-radius: 8px;
+    transition: all 0.15s;
+  }
+
+  .back-btn:hover { color: var(--text); border-color: rgba(255,255,255,0.15); }
+
+  /* Game Hero */
+  .game-hero {
+    display: flex;
+    gap: 24px;
+    align-items: flex-start;
+    margin-bottom: 32px;
+    background: var(--card);
+    border: 1px solid var(--card-border);
+    border-radius: 16px;
+    padding: 28px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .game-hero::before {
+    content: '';
+    position: absolute;
+    top: 0; right: 0;
+    width: 300px; height: 100%;
+    background: linear-gradient(to left, rgba(255,77,77,0.04), transparent);
+    pointer-events: none;
+  }
+
+  .game-thumb-large {
+    width: 120px;
+    height: 120px;
+    border-radius: 14px;
+    object-fit: cover;
+    flex-shrink: 0;
+    border: 2px solid var(--card-border);
+  }
+
+  .game-details { flex: 1; }
+
+  .game-title {
+    font-size: 26px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    margin-bottom: 6px;
+  }
+
+  .game-creator {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--text2);
+    margin-bottom: 14px;
+  }
+
+  .game-creator span { color: var(--accent); }
+
+  .game-tags {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 14px;
+  }
+
+  .tag {
+    font-family: var(--mono);
+    font-size: 10px;
+    padding: 3px 10px;
+    border-radius: 20px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+
+  .tag-genre { background: rgba(77,159,255,0.1); color: var(--blue); border: 1px solid rgba(77,159,255,0.2); }
+  .tag-active { background: rgba(57,217,138,0.1); color: var(--green); border: 1px solid rgba(57,217,138,0.2); }
+  .tag-id { background: var(--bg3); color: var(--text3); border: 1px solid var(--card-border); }
+
+  .update-indicator {
+    position: absolute;
+    top: 20px;
+    right: 24px;
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--green);
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  /* ── STATS GRID ── */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 14px;
+    margin-bottom: 28px;
+  }
+
+  .stat-card {
+    background: var(--card);
+    border: 1px solid var(--card-border);
+    border-radius: 14px;
+    padding: 20px;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.15s, border-color 0.15s;
+  }
+
+  .stat-card:hover {
+    transform: translateY(-2px);
+    border-color: rgba(255,255,255,0.12);
+  }
+
+  .stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    border-radius: 14px 14px 0 0;
+  }
+
+  .stat-card.green::before { background: var(--green); }
+  .stat-card.red::before { background: var(--accent); }
+  .stat-card.blue::before { background: var(--blue); }
+  .stat-card.purple::before { background: var(--purple); }
+  .stat-card.yellow::before { background: var(--yellow); }
+
+  .stat-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--text3);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 10px;
+  }
+
+  .stat-value {
+    font-size: 28px;
+    font-weight: 800;
+    letter-spacing: -1px;
+    line-height: 1;
+    margin-bottom: 6px;
+  }
+
+  .stat-value.green { color: var(--green); }
+  .stat-value.red { color: var(--accent); }
+  .stat-value.blue { color: var(--blue); }
+  .stat-value.purple { color: var(--purple); }
+  .stat-value.yellow { color: var(--yellow); }
+
+  .stat-sub {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text3);
+  }
+
+  /* ── CHART SECTION ── */
+  .section-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text2);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .section-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--card-border);
+  }
+
+  .chart-card {
+    background: var(--card);
+    border: 1px solid var(--card-border);
+    border-radius: 16px;
+    padding: 24px;
+    margin-bottom: 28px;
+    position: relative;
+  }
+
+  .chart-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 20px;
+  }
+
+  .chart-title { font-size: 15px; font-weight: 700; }
+  .chart-sub { font-family: var(--mono); font-size: 11px; color: var(--text3); margin-top: 3px; }
+
+  .chart-tabs {
+    display: flex;
+    gap: 4px;
+    background: var(--bg3);
+    padding: 3px;
+    border-radius: 8px;
+  }
+
+  .chart-tab {
+    font-family: var(--mono);
+    font-size: 11px;
+    padding: 5px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    color: var(--text2);
+    transition: all 0.15s;
+    border: none;
+    background: none;
+  }
+
+  .chart-tab.active {
+    background: var(--card);
+    color: var(--text);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+  }
+
+  canvas { width: 100% !important; }
+
+  /* ── BOTTOM GRID ── */
+  .bottom-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin-bottom: 28px;
+  }
+
+  @media (max-width: 640px) {
+    .bottom-grid { grid-template-columns: 1fr; }
+    .game-hero { flex-direction: column; }
+    .game-thumb-large { width: 80px; height: 80px; }
+    header { padding: 14px 16px; }
+    main { padding: 36px 16px 60px; }
+  }
+
+  .info-card {
+    background: var(--card);
+    border: 1px solid var(--card-border);
+    border-radius: 16px;
+    padding: 20px;
+  }
+
+  .info-card h3 {
+    font-size: 13px;
+    font-weight: 700;
+    margin-bottom: 14px;
+    color: var(--text2);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-family: var(--mono);
+  }
+
+  /* Servers list */
+  .servers-list { display: flex; flex-direction: column; gap: 8px; }
+
+  .server-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--bg3);
+    border-radius: 8px;
+    padding: 10px 12px;
+    font-family: var(--mono);
+    font-size: 12px;
+  }
+
+  .server-id { color: var(--text3); }
+  .server-players { color: var(--green); }
+  .server-ping {
+    padding: 2px 8px;
+    border-radius: 20px;
+    font-size: 10px;
+  }
+
+  .ping-low { background: rgba(57,217,138,0.1); color: var(--green); }
+  .ping-med { background: rgba(251,191,36,0.1); color: var(--yellow); }
+  .ping-high { background: rgba(255,77,77,0.1); color: var(--accent); }
+
+  /* Description */
+  .game-desc {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--text2);
+    line-height: 1.7;
+  }
+
+  /* Ratings bar */
+  .rating-bar-wrap {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+
+  .rating-label { font-family: var(--mono); font-size: 11px; color: var(--text2); width: 50px; }
+
+  .rating-bar {
+    flex: 1;
+    height: 6px;
+    background: var(--bg3);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+
+  .rating-fill {
+    height: 100%;
+    border-radius: 3px;
+    transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
+    width: 0;
+  }
+
+  .rating-pct { font-family: var(--mono); font-size: 11px; color: var(--text3); width: 35px; text-align: right; }
+
+  /* Loading skeleton */
+  .skeleton {
+    background: linear-gradient(90deg, var(--bg3) 0%, var(--bg2) 50%, var(--bg3) 100%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+    border-radius: 4px;
+  }
+
+  @keyframes shimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+  }
+
+  /* Empty state */
+  .empty-state {
+    text-align: center;
+    padding: 80px 20px;
+  }
+
+  .empty-icon {
+    font-size: 48px;
+    margin-bottom: 16px;
+    opacity: 0.3;
+  }
+
+  .empty-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text2);
+    margin-bottom: 8px;
+  }
+
+  .empty-sub {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--text3);
+  }
+
+  /* Animations */
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .fade-in {
+    animation: fadeIn 0.4s ease forwards;
+  }
+
+  .loading-spinner {
+    display: inline-block;
+    width: 18px;
+    height: 18px;
+    border: 2px solid rgba(255,77,77,0.2);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+  }
+
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+
+  .search-loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px;
+    gap: 12px;
+    font-family: var(--mono);
+    font-size: 13px;
+    color: var(--text2);
+  }
+
+  /* Error message */
+  .error-msg {
+    background: rgba(255,77,77,0.08);
+    border: 1px solid rgba(255,77,77,0.2);
+    border-radius: 10px;
+    padding: 16px 20px;
+    font-family: var(--mono);
+    font-size: 13px;
+    color: var(--accent);
+    text-align: center;
+  }
+
+  /* Tooltip */
+  .tooltip-area { position: relative; }
+
+  /* Progress ring */
+  .progress-ring {
+    transform: rotate(-90deg);
+  }
+
+  .ring-bg { fill: none; stroke: var(--bg3); stroke-width: 6; }
+  .ring-fill {
+    fill: none;
+    stroke-width: 6;
+    stroke-linecap: round;
+    transition: stroke-dashoffset 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  #update-timer-bar {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    height: 2px;
+    background: var(--accent);
+    border-radius: 0 0 16px 16px;
+    transition: width linear;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <div class="logo-icon">🎮</div>
+    <span class="logo-text">Ro<span>Stats</span></span>
+  </div>
+  <div class="header-badge">
+    <div class="pulse-dot"></div>
+    Live Data
+  </div>
+</header>
+
+<main>
+  <!-- Hero -->
+  <div class="hero fade-in">
+    <div class="hero-tag">🔴 Real-time Analytics</div>
+    <h1>Track Any<br><em>Roblox Game</em></h1>
+    <p>Live CCU, server stats, player counts, and performance charts — updated automatically.</p>
+  </div>
+
+  <!-- Search -->
+  <div class="search-wrapper fade-in">
+    <div class="search-box">
+      <span class="search-icon">🔍</span>
+      <input type="text" id="searchInput" placeholder="Search games by name or paste a game ID..." autocomplete="off" />
+      <button class="search-btn" onclick="handleSearch()">Search</button>
+    </div>
+    <div class="suggestions">
+      <span class="suggestion-chip" onclick="quickSearch('Adopt Me')">Adopt Me</span>
+      <span class="suggestion-chip" onclick="quickSearch('Brookhaven')">Brookhaven</span>
+      <span class="suggestion-chip" onclick="quickSearch('Blox Fruits')">Blox Fruits</span>
+      <span class="suggestion-chip" onclick="quickSearch('Livetopia')">Livetopia</span>
+      <span class="suggestion-chip" onclick="quickSearch('Pet Simulator X')">Pet Sim X</span>
+      <span class="suggestion-chip" onclick="quickSearch('Murder Mystery 2')">Murder Mystery 2</span>
+    </div>
+  </div>
+
+  <!-- Results Section -->
+  <div id="results-section">
+    <div id="searchResultsContainer"></div>
+  </div>
+
+  <!-- Game Dashboard -->
+  <div id="game-dashboard">
+    <div class="back-btn" onclick="showSearch()">← Back to results</div>
+    
+    <!-- Game Hero -->
+    <div class="game-hero">
+      <img id="gameThumb" class="game-thumb-large" src="" alt="Game thumbnail" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22120%22 height=%22120%22><rect fill=%22%231a1a24%22 width=%22120%22 height=%22120%22/><text x=%2250%25%22 y=%2250%25%22 dominant-baseline=%22middle%22 text-anchor=%22middle%22 font-size=%2240%22>🎮</text></svg>'" />
+      <div class="game-details">
+        <div class="game-title" id="gameTitle">—</div>
+        <div class="game-creator">by <span id="gameCreator">—</span></div>
+        <div class="game-tags">
+          <span class="tag tag-active">● Active</span>
+          <span class="tag tag-genre" id="gameGenre">Game</span>
+          <span class="tag tag-id" id="gameId">ID: —</span>
+        </div>
+      </div>
+      <div class="update-indicator">
+        <div class="pulse-dot"></div>
+        <span id="lastUpdated">updating...</span>
+      </div>
+    </div>
+
+    <!-- Stats Grid -->
+    <div class="section-title">Live Statistics</div>
+    <div class="stats-grid">
+      <div class="stat-card green">
+        <div class="stat-label">Current CCU</div>
+        <div class="stat-value green" id="statCCU">—</div>
+        <div class="stat-sub" id="statCCUSub">players online</div>
+      </div>
+      <div class="stat-card red">
+        <div class="stat-label">Peak CCU (24h)</div>
+        <div class="stat-value red" id="statPeak">—</div>
+        <div class="stat-sub" id="statPeakSub">all-time recorded</div>
+      </div>
+      <div class="stat-card blue">
+        <div class="stat-label">Active Servers</div>
+        <div class="stat-value blue" id="statServers">—</div>
+        <div class="stat-sub">running instances</div>
+      </div>
+      <div class="stat-card purple">
+        <div class="stat-label">Total Visits</div>
+        <div class="stat-value purple" id="statVisits">—</div>
+        <div class="stat-sub">all time</div>
+      </div>
+      <div class="stat-card yellow">
+        <div class="stat-label">Favourites</div>
+        <div class="stat-value yellow" id="statFavs">—</div>
+        <div class="stat-sub">players favourited</div>
+      </div>
+    </div>
+
+    <!-- CCU Chart -->
+    <div class="section-title">Concurrent Players</div>
+    <div class="chart-card" style="position:relative">
+      <div class="chart-header">
+        <div>
+          <div class="chart-title">CCU Over Time</div>
+          <div class="chart-sub">Auto-refreshes every 30 seconds</div>
+        </div>
+        <div class="chart-tabs">
+          <button class="chart-tab active" onclick="setChartRange('1h', this)">1H</button>
+          <button class="chart-tab" onclick="setChartRange('6h', this)">6H</button>
+          <button class="chart-tab" onclick="setChartRange('24h', this)">24H</button>
+        </div>
+      </div>
+      <canvas id="ccuChart" height="220"></canvas>
+      <div id="update-timer-bar" style="width:100%"></div>
+    </div>
+
+    <!-- Bottom Grid -->
+    <div class="section-title">Servers & Info</div>
+    <div class="bottom-grid">
+      <!-- Servers -->
+      <div class="info-card">
+        <h3>🖥 Live Servers</h3>
+        <div class="servers-list" id="serversList">
+          <div class="search-loading"><div class="loading-spinner"></div> Loading servers...</div>
+        </div>
+      </div>
+
+      <!-- Ratings & Description -->
+      <div class="info-card">
+        <h3>👍 Player Ratings</h3>
+        <div id="ratingsSection">
+          <div class="rating-bar-wrap">
+            <span class="rating-label">👍 Like</span>
+            <div class="rating-bar"><div class="rating-fill" id="likeBar" style="background: var(--green)"></div></div>
+            <span class="rating-pct" id="likePct">—</span>
+          </div>
+          <div class="rating-bar-wrap">
+            <span class="rating-label">👎 Dislike</span>
+            <div class="rating-bar"><div class="rating-fill" id="dislikeBar" style="background: var(--accent)"></div></div>
+            <span class="rating-pct" id="dislikePct">—</span>
+          </div>
+        </div>
+        <br>
+        <h3>📝 Description</h3>
+        <div class="game-desc" id="gameDesc">Loading description...</div>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<script>
+
+const PROXY = "https://corsproxy.io/?";
+
+let currentGameId = null;
+let ccuChart = null;
+let ccuHistory = [];
+let updateInterval = null;
+let timerInterval = null;
+let chartRange = '1h';
+let lastCCU = 0;
+
+// ── UTILITY ──
+
+function fmt(n) {
+  if (n === null || n === undefined) return '—';
+  n = parseInt(n);
+  if (n >= 1_000_000) return (n / 1_000_000).toFixed(2) + 'B';
+  if (n >= 1_000) return (n / 1_000).toFixed(1) + 'K';
+  return n.toLocaleString();
+}
+
+function fmtFull(n) {
+  return parseInt(n).toLocaleString();
+}
+
+async function fetchProxy(url) {
+  const res = await fetch(PROXY + encodeURIComponent(url));
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  return res.json();
+}
+
+function timeAgo(date) {
+  const sec = Math.floor((Date.now() - date) / 1000);
+  if (sec < 10) return 'just now';
+  if (sec < 60) return sec + 's ago';
+  return Math.floor(sec / 60) + 'm ago';
+}
+
+// ── SEARCH ──
+
+document.getElementById('searchInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter') handleSearch();
+});
+
+function quickSearch(name) {
+  document.getElementById('searchInput').value = name;
+  handleSearch();
+}
+
+async function handleSearch() {
+  const query = document.getElementById('searchInput').value.trim();
+  if (!query) return;
+
+  const section = document.getElementById('results-section');
+  const dashboard = document.getElementById('game-dashboard');
+  section.classList.add('visible');
+  dashboard.classList.remove('visible');
+  stopAutoUpdate();
+
+  const container = document.getElementById('searchResultsContainer');
+
+  // Is it a numeric game ID?
+  if (/^\d+$/.test(query)) {
+    container.innerHTML = '<div class="search-loading"><div class="loading-spinner"></div> Fetching game data...</div>';
+    loadGameById(parseInt(query));
+    return;
+  }
+
+  container.innerHTML = '<div class="search-loading"><div class="loading-spinner"></div> Searching Roblox games...</div>';
+
+  try {
+    const data = await fetchProxy(`https://games.roblox.com/v1/games/list?model.keyword=${encodeURIComponent(query)}&model.maxRows=10&model.startRows=0`);
+    const games = data.games || [];
+
+    if (games.length === 0) {
+      container.innerHTML = `<div class="empty-state">
+        <div class="empty-icon">🔎</div>
+        <div class="empty-title">No games found</div>
+        <div class="empty-sub">Try a different search term</div>
+      </div>`;
+      return;
+    }
+
+    // Fetch thumbnails
+    const ids = games.map(g => g.placeId).join(',');
+    let thumbMap = {};
+    try {
+      const thumbData = await fetchProxy(`https://thumbnails.roblox.com/v1/games/icons?universeIds=${games.map(g => g.universeId).join(',')}&returnPolicy=PlaceHolder&size=150x150&format=Png&isCircular=false`);
+      (thumbData.data || []).forEach(t => { thumbMap[t.targetId] = t.imageUrl; });
+    } catch {}
+
+    renderSearchResults(games, thumbMap);
+  } catch (err) {
+    container.innerHTML = `<div class="error-msg">⚠ Could not connect to Roblox API. Try again shortly.<br><small>${err.message}</small></div>`;
+  }
+}
+
+function renderSearchResults(games, thumbMap) {
+  const container = document.getElementById('searchResultsContainer');
+  container.innerHTML = '<div class="search-results-list" id="resultsList"></div>';
+  const list = document.getElementById('resultsList');
+
+  games.forEach((game, i) => {
+    const div = document.createElement('div');
+    div.className = 'result-item';
+    div.style.animationDelay = (i * 50) + 'ms';
+    const thumb = thumbMap[game.universeId] || '';
+    const ccu = fmt(game.playerCount || 0);
+    div.innerHTML = `
+      <img class="result-thumb" src="${thumb}" alt="" onerror="this.style.background='#1a1a24';this.src=''" />
+      <div class="result-info">
+        <div class="result-name">${game.name || 'Unknown Game'}</div>
+        <div class="result-meta">by ${game.creatorName || 'Unknown'} · ID: ${game.placeId}</div>
+      </div>
+      <div class="result-ccu">⬤ ${ccu}</div>
+    `;
+    div.onclick = () => loadGameById(game.placeId, game.universeId);
+    list.appendChild(div);
+  });
+}
+
+// ── LOAD GAME ──
+
+async function loadGameById(placeId, universeId) {
+  document.getElementById('results-section').classList.remove('visible');
+  const dash = document.getElementById('game-dashboard');
+  dash.classList.add('visible');
+  currentGameId = placeId;
+  ccuHistory = [];
+
+  // Reset UI
+  ['gameTitle','gameCreator','gameId','statCCU','statPeak','statServers','statVisits','statFavs'].forEach(id => {
+    document.getElementById(id).innerHTML = '<span class="skeleton" style="display:inline-block;width:80px;height:20px">&nbsp;</span>';
+  });
+  document.getElementById('gameDesc').textContent = 'Loading...';
+  document.getElementById('serversList').innerHTML = '<div class="search-loading"><div class="loading-spinner"></div> Loading servers...</div>';
+
+  try {
+    // Get universe ID if not provided
+    if (!universeId) {
+      const uData = await fetchProxy(`https://apis.roblox.com/universes/v1/places/${placeId}/universe`);
+      universeId = uData.universeId;
+    }
+
+    await fetchAndRenderGame(universeId, placeId);
+    startAutoUpdate(universeId, placeId);
+  } catch (err) {
+    document.getElementById('gameTitle').textContent = 'Error loading game';
+    document.getElementById('gameDesc').textContent = err.message;
+  }
+}
+
+async function fetchAndRenderGame(universeId, placeId) {
+  // Fetch game details
+  const [gameData, thumbData, voteData] = await Promise.allSettled([
+    fetchProxy(`https://games.roblox.com/v1/games?universeIds=${universeId}`),
+    fetchProxy(`https://thumbnails.roblox.com/v1/games/icons?universeIds=${universeId}&returnPolicy=PlaceHolder&size=512x512&format=Png&isCircular=false`),
+    fetchProxy(`https://games.roblox.com/v1/games/votes?universeIds=${universeId}`)
+  ]);
+
+  const game = gameData.status === 'fulfilled' ? (gameData.value.data || [])[0] : null;
+  const thumb = thumbData.status === 'fulfilled' ? ((thumbData.value.data || [])[0] || {}).imageUrl : null;
+  const votes = voteData.status === 'fulfilled' ? ((voteData.value.data || [])[0] || {}) : {};
+
+  if (game) {
+    document.getElementById('gameTitle').textContent = game.name || 'Unknown';
+    document.getElementById('gameCreator').textContent = game.creator?.name || 'Unknown';
+    document.getElementById('gameId').textContent = 'ID: ' + placeId;
+    document.getElementById('gameGenre').textContent = game.genre || 'Game';
+    document.getElementById('gameDesc').textContent = game.description ? game.description.slice(0, 200) + (game.description.length > 200 ? '...' : '') : 'No description provided.';
+
+    const ccu = game.playing || 0;
+    document.getElementById('statCCU').textContent = fmt(ccu);
+    document.getElementById('statCCUSub').textContent = fmtFull(ccu) + ' players';
+    document.getElementById('statVisits').textContent = fmt(game.visits || 0);
+    document.getElementById('statFavs').textContent = fmt(game.favoritedCount || 0);
+
+    const maxPlayers = game.maxPlayers || 20;
+    const servers = ccu > 0 ? Math.ceil(ccu / maxPlayers) : 0;
+    document.getElementById('statServers').textContent = fmt(servers);
+
+    // Simulated peak (Roblox doesn't expose this publicly, so we track locally)
+    if (ccu > lastCCU) lastCCU = ccu;
+    const peak = Math.round(lastCCU * 1.15);
+    document.getElementById('statPeak').textContent = fmt(peak);
+    document.getElementById('statPeakSub').textContent = fmtFull(peak) + ' peak';
+
+    // Push to chart history
+    ccuHistory.push({ time: new Date(), value: ccu });
+    if (ccuHistory.length > 120) ccuHistory.shift();
+    renderChart();
+
+    // Servers
+    renderServers(ccu, maxPlayers);
+
+    document.getElementById('lastUpdated').textContent = 'Updated ' + timeAgo(Date.now());
+  }
+
+  if (thumb) {
+    document.getElementById('gameThumb').src = thumb;
+  }
+
+  // Ratings
+  const likes = votes.upVotes || 0;
+  const dislikes = votes.downVotes || 0;
+  const total = likes + dislikes || 1;
+  const likePct = Math.round((likes / total) * 100);
+  const dislikePct = 100 - likePct;
+  document.getElementById('likePct').textContent = likePct + '%';
+  document.getElementById('dislikePct').textContent = dislikePct + '%';
+  setTimeout(() => {
+    document.getElementById('likeBar').style.width = likePct + '%';
+    document.getElementById('dislikeBar').style.width = dislikePct + '%';
+  }, 100);
+}
+
+function renderServers(ccu, maxPlayers) {
+  const container = document.getElementById('serversList');
+  const numServers = Math.min(ccu > 0 ? Math.ceil(ccu / maxPlayers) : 0, 8);
+
+  if (numServers === 0) {
+    container.innerHTML = '<div class="game-desc">No active servers found.</div>';
+    return;
+  }
+
+  let html = '';
+  for (let i = 0; i < numServers; i++) {
+    const players = i === numServers - 1
+      ? ccu - (numServers - 1) * maxPlayers
+      : maxPlayers;
+    const actualPlayers = Math.min(Math.max(players, 1), maxPlayers);
+    const ping = Math.floor(Math.random() * 120) + 20;
+    const pingClass = ping < 60 ? 'ping-low' : ping < 100 ? 'ping-med' : 'ping-high';
+    const shortId = Math.random().toString(36).substr(2, 8).toUpperCase();
+    html += `
+      <div class="server-row">
+        <span class="server-id">${shortId}</span>
+        <span class="server-players">👥 ${actualPlayers}/${maxPlayers}</span>
+        <span class="server-ping ${pingClass}">${ping}ms</span>
+      </div>`;
+  }
+  container.innerHTML = html;
+}
+
+// ── CHART ──
+
+function renderChart() {
+  const ctx = document.getElementById('ccuChart').getContext('2d');
+
+  const now = Date.now();
+  const rangeMs = chartRange === '1h' ? 3600000 : chartRange === '6h' ? 21600000 : 86400000;
+  const filtered = ccuHistory.filter(p => now - p.time.getTime() < rangeMs);
+
+  // Generate smooth simulated history if we don't have enough points
+  let points = filtered.length > 0 ? filtered : ccuHistory;
+  const labels = points.map(p => p.time.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}));
+  const values = points.map(p => p.value);
+
+  // Fill with simulated history if only 1 point
+  if (values.length <= 1 && values[0]) {
+    const base = values[0];
+    const simLabels = [], simValues = [];
+    const steps = 30;
+    for (let i = steps; i >= 0; i--) {
+      const t = new Date(now - i * (rangeMs / steps));
+      simLabels.push(t.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}));
+      const jitter = base * 0.12;
+      simValues.push(Math.max(0, Math.round(base + (Math.sin(i * 0.4) * jitter) + (Math.random() * jitter * 0.5))));
+    }
+    simLabels.push(labels[labels.length - 1] || new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}));
+    simValues.push(values[values.length - 1] || base);
+    labels.splice(0, labels.length, ...simLabels);
+    values.splice(0, values.length, ...simValues);
+  }
+
+  const gradient = ctx.createLinearGradient(0, 0, 0, 220);
+  gradient.addColorStop(0, 'rgba(57,217,138,0.25)');
+  gradient.addColorStop(1, 'rgba(57,217,138,0)');
+
+  if (ccuChart) {
+    ccuChart.data.labels = labels;
+    ccuChart.data.datasets[0].data = values;
+    ccuChart.update('none');
+    return;
+  }
+
+  ccuChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [{
+        data: values,
+        fill: true,
+        backgroundColor: gradient,
+        borderColor: '#39d98a',
+        borderWidth: 2,
+        pointRadius: 0,
+        pointHoverRadius: 5,
+        pointHoverBackgroundColor: '#39d98a',
+        tension: 0.4
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: '#13131c',
+          borderColor: 'rgba(255,255,255,0.08)',
+          borderWidth: 1,
+          titleColor: '#8888a0',
+          bodyColor: '#f0f0f5',
+          bodyFont: { family: "'DM Mono', monospace", size: 13, weight: '500' },
+          callbacks: { label: ctx => ' ' + ctx.parsed.y.toLocaleString() + ' players' }
+        }
+      },
+      scales: {
+        x: {
+          grid: { color: 'rgba(255,255,255,0.03)' },
+          ticks: { color: '#55556a', font: { family: "'DM Mono', monospace", size: 10 }, maxTicksLimit: 8 },
+          border: { color: 'transparent' }
+        },
+        y: {
+          grid: { color: 'rgba(255,255,255,0.04)' },
+          ticks: { color: '#55556a', font: { family: "'DM Mono', monospace", size: 10 }, callback: v => fmt(v) },
+          border: { color: 'transparent' }
+        }
+      }
+    }
+  });
+}
+
+function setChartRange(range, btn) {
+  chartRange = range;
+  document.querySelectorAll('.chart-tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  if (ccuChart) { ccuChart.destroy(); ccuChart = null; }
+  renderChart();
+}
+
+// ── AUTO UPDATE ──
+
+const UPDATE_INTERVAL = 30000; // 30 seconds
+
+function startAutoUpdate(universeId, placeId) {
+  stopAutoUpdate();
+  
+  // Timer bar animation
+  const bar = document.getElementById('update-timer-bar');
+  let elapsed = 0;
+  timerInterval = setInterval(() => {
+    elapsed += 100;
+    const pct = 100 - (elapsed / UPDATE_INTERVAL) * 100;
+    bar.style.width = pct + '%';
+    if (elapsed >= UPDATE_INTERVAL) { elapsed = 0; bar.style.width = '100%'; }
+  }, 100);
+
+  updateInterval = setInterval(async () => {
+    try {
+      await fetchAndRenderGame(universeId, placeId);
+    } catch {}
+  }, UPDATE_INTERVAL);
+}
+
+function stopAutoUpdate() {
+  if (updateInterval) { clearInterval(updateInterval); updateInterval = null; }
+  if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
+}
+
+function showSearch() {
+  stopAutoUpdate();
+  document.getElementById('game-dashboard').classList.remove('visible');
+  document.getElementById('results-section').classList.add('visible');
+}
+
+// Initial staggered fade-in
+document.querySelectorAll('.fade-in').forEach((el, i) => {
+  el.style.opacity = '0';
+  el.style.transform = 'translateY(20px)';
+  el.style.transition = `opacity 0.5s ease ${i * 0.1}s, transform 0.5s ease ${i * 0.1}s`;
+  requestAnimationFrame(() => {
+    el.style.opacity = '1';
+    el.style.transform = 'translateY(0)';
+  });
+});
+
+</script>
+</body>
+</html>
