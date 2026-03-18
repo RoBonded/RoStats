@@ -322,12 +322,12 @@ footer{border-top:1px solid var(--border);padding:20px 28px;text-align:center;fo
       <div class="global-stat gs-blue">
         <div class="gs-label">Total Players Online</div>
         <div class="gs-value" id="gs-ccu">—</div>
-        <div class="gs-sub">concurrent users</div>
+        <div class="gs-sub">live · via Roblox API</div>
       </div>
       <div class="global-stat gs-white">
-        <div class="gs-label">Peak CCU</div>
-        <div class="gs-value" id="gs-peak">—</div>
-        <div class="gs-sub">all-time record</div>
+        <div class="gs-label">Peak CCU (All-Time)</div>
+        <div class="gs-value" id="gs-peak">47.3M</div>
+        <div class="gs-sub">source: rotrends.com</div>
       </div>
       <div class="global-stat gs-green">
         <div class="gs-label">Active Games</div>
@@ -343,24 +343,24 @@ footer{border-top:1px solid var(--border);padding:20px 28px;text-align:center;fo
 
     <div class="section" id="section-trending">
       <div class="section-header">
-        <div class="section-label"><span class="label-tag tag-blue">Trending</span><span class="section-title">Top Moving Games</span></div>
-        <button class="see-all">Explore all</button>
+        <div class="section-label"><span class="label-tag tag-blue">Trending</span><span class="section-title">Top Moving Games</span><a href="https://rotrends.com/trending-roblox-games" target="_blank" rel="noopener" style="font-family:var(--mono);font-size:10px;color:var(--text3);margin-left:6px;transition:color .14s" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--text3)'">via rotrends ↗</a></div>
+        <a href="https://rotrends.com/trending-roblox-games" target="_blank" rel="noopener" class="see-all">See on rotrends</a>
       </div>
       <div class="games-row" id="row-trending"></div>
     </div>
 
     <div class="section" id="section-new">
       <div class="section-header">
-        <div class="section-label"><span class="label-tag tag-green">New</span><span class="section-title">New &amp; Rising</span></div>
-        <button class="see-all">Explore all</button>
+        <div class="section-label"><span class="label-tag tag-green">New</span><span class="section-title">New &amp; Rising</span><a href="https://rotrends.com/games?sort=-rank_change_day" target="_blank" rel="noopener" style="font-family:var(--mono);font-size:10px;color:var(--text3);margin-left:6px;transition:color .14s" onmouseover="this.style.color='var(--green)'" onmouseout="this.style.color='var(--text3)'">via rotrends ↗</a></div>
+        <a href="https://rotrends.com/games?sort=-rank_change_day" target="_blank" rel="noopener" class="see-all">See on rotrends</a>
       </div>
       <div class="games-row" id="row-new"></div>
     </div>
 
     <div class="section" id="section-top">
       <div class="section-header">
-        <div class="section-label"><span class="label-tag tag-white">Top</span><span class="section-title">Top by Players</span></div>
-        <button class="see-all">Explore all</button>
+        <div class="section-label"><span class="label-tag tag-white">Top</span><span class="section-title">Top by Players</span><a href="https://rotrends.com/top-roblox-games" target="_blank" rel="noopener" style="font-family:var(--mono);font-size:10px;color:var(--text3);margin-left:6px;transition:color .14s" onmouseover="this.style.color='var(--text2)'" onmouseout="this.style.color='var(--text3)'">via rotrends ↗</a></div>
+        <a href="https://rotrends.com/top-roblox-games" target="_blank" rel="noopener" class="see-all">Full list on rotrends</a>
       </div>
       <div class="games-row" id="row-top"></div>
     </div>
@@ -503,7 +503,27 @@ footer{border-top:1px solid var(--border);padding:20px 28px;text-align:center;fo
 </div>
 
 <footer>
-  RoStats &nbsp;&middot;&nbsp; Roblox Analytics &nbsp;&middot;&nbsp; Not affiliated with Roblox Corporation &nbsp;&middot;&nbsp; Live data refreshes every 30s
+  <div style="display:flex;align-items:center;justify-content:center;gap:18px;flex-wrap:wrap;margin-bottom:10px">
+    <a href="https://rotrends.com" target="_blank" rel="noopener" style="color:var(--text2);font-family:var(--mono);font-size:11px;display:flex;align-items:center;gap:5px;transition:color .14s" onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='var(--text2)'">
+      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+      rotrends.com
+    </a>
+    <a href="https://rolimons.com" target="_blank" rel="noopener" style="color:var(--text2);font-family:var(--mono);font-size:11px;display:flex;align-items:center;gap:5px;transition:color .14s" onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='var(--text2)'">
+      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+      rolimons.com
+    </a>
+    <a href="https://www.roblox.com" target="_blank" rel="noopener" style="color:var(--text2);font-family:var(--mono);font-size:11px;display:flex;align-items:center;gap:5px;transition:color .14s" onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='var(--text2)'">
+      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+      roblox.com
+    </a>
+    <a href="https://developer.roblox.com" target="_blank" rel="noopener" style="color:var(--text2);font-family:var(--mono);font-size:11px;display:flex;align-items:center;gap:5px;transition:color .14s" onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='var(--text2)'">
+      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+      DevForum
+    </a>
+  </div>
+  <div style="color:var(--text3);font-family:var(--mono);font-size:10px">
+    RoStats &nbsp;&middot;&nbsp; Game data sourced via Roblox API &amp; rotrends.com &nbsp;&middot;&nbsp; Not affiliated with Roblox Corporation &nbsp;&middot;&nbsp; Live data refreshes every 30s
+  </div>
 </footer>
 <div id="toast"></div>
 
@@ -515,33 +535,51 @@ footer{border-top:1px solid var(--border);padding:20px 28px;text-align:center;fo
 ══════════════════════════════════════════ */
 const WORKER_URL = "https://rostats.studioobbys.workers.dev";
 
-/* ══════════════════════════════════════════
-   VERIFIED UNIVERSE IDs — Top games March 2026
-══════════════════════════════════════════ */
+/* ══════════════════════════════════════════════════════════
+   LIVE UNIVERSE IDs — sourced from rotrends.com Mar 18 2026
+   All IDs extracted from rotrends.com/game/<universeId>/...
+══════════════════════════════════════════════════════════ */
+
+// Top by Players (rotrends Leaderboard — Top by Players)
 const TOP_UNIVERSE_IDS = [
-  6701277882,  // Fish It!                (Fish Atelier)
-  3260590327,  // Adopt Me!               (Uplift Games)
-  1686885941,  // Brookhaven RP           (Voldex)
-  994732206,   // Blox Fruits             (Gamer Robot Inc)
-  7709344486,  // Steal a Brainrot        (BRAZILIAN SPYDER)
-  7436755782,  // Grow a Garden           (The Garden Game)
-  6035872082,  // RIVALS                  (Nosniy Games)
-  7326934954,  // 99 Nights in Forest     (Grandma's Favourite)
-  1530809614,  // Murder Mystery 2        (Nikilis)
-  142823291,   // MeepCity                (alexnewtron)
+  1686885941,  // Brookhaven RP            #1  @Brookhaven by Voldex
+  383310974,   // Adopt Me!                #2  @Uplift Games
+  6701277882,  // Fish It!                 #3  @Fish Atelier
+  7709344486,  // Steal a Brainrot         #4  @BRAZILIAN SPYDER
+  7326934954,  // 99 Nights in Forest      #5  @Grandma's Favourite Games
+  6035872082,  // RIVALS                   #6  @Nosniy Games
+  994732206,   // Blox Fruits              #7  @Gamer Robot Inc
+  9363735110,  // Escape Tsunami Brainrots     @Wave of Brainrots
+  8910189997,  // OG Bubble Gum Simulator      @OG Bubble Gum Simulator
+  3317771874,  // Pet Simulator 99!            @BIG Games Pets
 ];
 
+// Top Moving / Trending Today (rotrends "Top Moving Games")
+const TRENDING_UNIVERSE_IDS = [
+  9820970110,  // Zee [GLITCH]            +18,955  @Walmart$
+  9186156001,  // Draw Space              +10,472  @fooly_grulee
+  9811793819,  // Admin Fruits [UPDATE 4]  +4,188  @Ultriom Studio
+  9544778254,  // MM2 pero GRATIS          +3,721  @Dragon Cannelloni
+  9751761702,  // Throwing Simulator       +3,277  @HoiAndBai Studio
+  8834587397,  // Find the Brainrot [402]    +680  @Find The Games World
+  648454481,   // Grand Piece Online         +219  @Grand Quest Games
+  9757776682,  // Cut Grass for Brainrots    +119  @Very Green Grass
+  7008097940,  // Ink Game                    +81  @games i think
+  9344307274,  // Break a Lucky Block!        +76  @Slime Time Studios
+];
+
+// New & Rising (rotrends "New and Rising" section)
 const NEW_UNIVERSE_IDS = [
-  7436755782,  // Grow a Garden
-  7709344486,  // Steal a Brainrot
-  6035872082,  // RIVALS
-  7326934954,  // 99 Nights in Forest
-  4924922222,  // Fisch
-  5507419539,  // Dress to Impress
-  3214891237,  // Tower of Hell
-  3519544228,  // Piggy
-  1537690962,  // Pet Simulator X
-  1530809614,  // Murder Mystery 2
+  9744051907,  // NIGHT CLUB [VIP 1 RBX]  32,553  @Senja Community
+  9834000877,  // Escape Tsunami Supercars 19,528  @Brainrott Studios
+  9820970110,  // Zee [GLITCH]            18,955  @Walmart$
+  9801137791,  // Steal a Meme [UPD]      18,688  @Matvey676656
+  9764416796,  // steal a sleykizz        17,443  @TWT_SLEYKIZZ
+  9704343971,  // Grow Beanstalk Brainrots     @Cant Stop Playing
+  9715999586,  // Defend your base from 67     @Simulator D2D
+  9753814298,  // Swing Obby for Brainrots     @HEY THATS MINE
+  9774981774,  // Re:Rangers X                 @[B:S] ARX Team
+  6167925365,  // Cong Dong Viet Nam           @Cong Dong Viet Nam
 ];
 
 /* ══════════════════════════════════════════
@@ -598,7 +636,7 @@ async function loadHome() {
   _allLoadedGames = [];
   renderSkeletons('row-trending'); renderSkeletons('row-new'); renderSkeletons('row-top');
   await Promise.allSettled([
-    loadGamesByUniverseIds('row-trending', TOP_UNIVERSE_IDS),
+    loadGamesByUniverseIds('row-trending', TRENDING_UNIVERSE_IDS),
     loadGamesByUniverseIds('row-new',      NEW_UNIVERSE_IDS),
     loadGamesByUniverseIds('row-top',      TOP_UNIVERSE_IDS),
   ]);
