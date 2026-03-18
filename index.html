@@ -3,1326 +3,1071 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>RoStats — Roblox Game Analytics</title>
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<title>RoStats — Roblox Analytics & Live Stats</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --bg: #0a0a0f;
-    --bg2: #111118;
-    --bg3: #1a1a24;
-    --card: #13131c;
-    --card-border: rgba(255,255,255,0.07);
-    --accent: #ff4d4d;
-    --accent2: #ff8c42;
-    --accent-glow: rgba(255,77,77,0.15);
-    --text: #f0f0f5;
-    --text2: #8888a0;
-    --text3: #55556a;
-    --green: #39d98a;
-    --blue: #4d9fff;
-    --purple: #a855f7;
-    --yellow: #fbbf24;
-    --mono: 'DM Mono', monospace;
-    --sans: 'Syne', sans-serif;
-  }
-
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: var(--sans);
-    min-height: 100vh;
-    overflow-x: hidden;
-  }
-
-  /* Background grid */
-  body::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    background-image:
-      linear-gradient(rgba(255,77,77,0.03) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(255,77,77,0.03) 1px, transparent 1px);
-    background-size: 60px 60px;
-    pointer-events: none;
-    z-index: 0;
-  }
-
-  /* Radial glow top */
-  body::after {
-    content: '';
-    position: fixed;
-    top: -200px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 900px;
-    height: 500px;
-    background: radial-gradient(ellipse, rgba(255,77,77,0.07) 0%, transparent 70%);
-    pointer-events: none;
-    z-index: 0;
-  }
-
-  /* ── HEADER ── */
-  header {
-    position: relative;
-    z-index: 10;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 20px 40px;
-    border-bottom: 1px solid var(--card-border);
-    backdrop-filter: blur(12px);
-    background: rgba(10,10,15,0.7);
-    position: sticky;
-    top: 0;
-  }
-
-  .logo {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    text-decoration: none;
-  }
-
-  .logo-icon {
-    width: 36px;
-    height: 36px;
-    background: var(--accent);
-    border-radius: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 18px;
-    box-shadow: 0 0 20px rgba(255,77,77,0.4);
-  }
-
-  .logo-text {
-    font-size: 20px;
-    font-weight: 800;
-    letter-spacing: -0.5px;
-  }
-
-  .logo-text span { color: var(--accent); }
-
-  .header-badge {
-    font-family: var(--mono);
-    font-size: 11px;
-    color: var(--green);
-    background: rgba(57,217,138,0.1);
-    border: 1px solid rgba(57,217,138,0.2);
-    padding: 4px 10px;
-    border-radius: 20px;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-  }
-
-  .pulse-dot {
-    width: 6px;
-    height: 6px;
-    background: var(--green);
-    border-radius: 50%;
-    animation: pulse 2s ease-in-out infinite;
-  }
-
-  @keyframes pulse {
-    0%, 100% { opacity: 1; transform: scale(1); }
-    50% { opacity: 0.4; transform: scale(0.8); }
-  }
-
-  /* ── MAIN ── */
-  main {
-    position: relative;
-    z-index: 5;
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 60px 24px 80px;
-  }
-
-  /* ── HERO ── */
-  .hero {
-    text-align: center;
-    margin-bottom: 48px;
-  }
-
-  .hero-tag {
-    display: inline-block;
-    font-family: var(--mono);
-    font-size: 11px;
-    color: var(--accent);
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    margin-bottom: 16px;
-    background: var(--accent-glow);
-    padding: 5px 14px;
-    border-radius: 20px;
-    border: 1px solid rgba(255,77,77,0.2);
-  }
-
-  .hero h1 {
-    font-size: clamp(36px, 6vw, 64px);
-    font-weight: 800;
-    line-height: 1.05;
-    letter-spacing: -2px;
-    margin-bottom: 16px;
-  }
-
-  .hero h1 em {
-    font-style: normal;
-    color: var(--accent);
-    position: relative;
-  }
-
-  .hero p {
-    font-size: 16px;
-    color: var(--text2);
-    font-weight: 400;
-    max-width: 440px;
-    margin: 0 auto;
-    line-height: 1.6;
-    font-family: var(--mono);
-  }
-
-  /* ── SEARCH ── */
-  .search-wrapper {
-    max-width: 640px;
-    margin: 0 auto 48px;
-    position: relative;
-  }
-
-  .search-box {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    background: var(--card);
-    border: 1px solid var(--card-border);
-    border-radius: 14px;
-    padding: 6px 6px 6px 20px;
-    transition: border-color 0.2s, box-shadow 0.2s;
-  }
-
-  .search-box:focus-within {
-    border-color: rgba(255,77,77,0.4);
-    box-shadow: 0 0 0 3px var(--accent-glow), 0 8px 32px rgba(0,0,0,0.4);
-  }
-
-  .search-icon {
-    color: var(--text3);
-    font-size: 16px;
-    flex-shrink: 0;
-  }
-
-  .search-box input {
-    flex: 1;
-    background: none;
-    border: none;
-    outline: none;
-    font-family: var(--sans);
-    font-size: 15px;
-    color: var(--text);
-    font-weight: 600;
-  }
-
-  .search-box input::placeholder { color: var(--text3); font-weight: 400; }
-
-  .search-btn {
-    background: var(--accent);
-    color: white;
-    border: none;
-    padding: 12px 24px;
-    border-radius: 10px;
-    font-family: var(--sans);
-    font-size: 13px;
-    font-weight: 700;
-    cursor: pointer;
-    transition: transform 0.15s, box-shadow 0.15s, background 0.15s;
-    white-space: nowrap;
-    letter-spacing: 0.3px;
-  }
-
-  .search-btn:hover {
-    background: #ff3333;
-    transform: translateY(-1px);
-    box-shadow: 0 4px 20px rgba(255,77,77,0.4);
-  }
-
-  .search-btn:active { transform: translateY(0); }
-
-  /* Search suggestions */
-  .suggestions {
-    display: flex;
-    gap: 8px;
-    flex-wrap: wrap;
-    justify-content: center;
-    margin-top: 14px;
-  }
-
-  .suggestion-chip {
-    font-family: var(--mono);
-    font-size: 11px;
-    color: var(--text2);
-    background: var(--bg3);
-    border: 1px solid var(--card-border);
-    padding: 5px 12px;
-    border-radius: 20px;
-    cursor: pointer;
-    transition: all 0.15s;
-  }
-
-  .suggestion-chip:hover {
-    color: var(--text);
-    border-color: rgba(255,77,77,0.3);
-    background: rgba(255,77,77,0.06);
-  }
-
-  /* ── RESULTS AREA ── */
-  #results-section { display: none; }
-  #results-section.visible { display: block; }
-
-  /* Search Results List */
-  .search-results-list {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    margin-bottom: 32px;
-  }
-
-  .result-item {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    background: var(--card);
-    border: 1px solid var(--card-border);
-    border-radius: 12px;
-    padding: 12px 16px;
-    cursor: pointer;
-    transition: all 0.15s;
-    animation: fadeIn 0.3s ease forwards;
-    opacity: 0;
-  }
-
-  .result-item:hover {
-    border-color: rgba(255,77,77,0.3);
-    background: rgba(255,77,77,0.05);
-    transform: translateX(4px);
-  }
-
-  .result-thumb {
-    width: 56px;
-    height: 56px;
-    border-radius: 8px;
-    object-fit: cover;
-    background: var(--bg3);
-    flex-shrink: 0;
-  }
-
-  .result-info { flex: 1; min-width: 0; }
-
-  .result-name {
-    font-size: 14px;
-    font-weight: 700;
-    margin-bottom: 3px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
-  .result-meta {
-    font-family: var(--mono);
-    font-size: 11px;
-    color: var(--text2);
-  }
-
-  .result-ccu {
-    font-family: var(--mono);
-    font-size: 13px;
-    font-weight: 500;
-    color: var(--green);
-    flex-shrink: 0;
-  }
-
-  /* ── GAME DASHBOARD ── */
-  #game-dashboard { display: none; }
-  #game-dashboard.visible { display: block; }
-
-  .back-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    font-family: var(--mono);
-    font-size: 12px;
-    color: var(--text2);
-    cursor: pointer;
-    margin-bottom: 28px;
-    padding: 8px 14px;
-    background: var(--card);
-    border: 1px solid var(--card-border);
-    border-radius: 8px;
-    transition: all 0.15s;
-  }
-
-  .back-btn:hover { color: var(--text); border-color: rgba(255,255,255,0.15); }
-
-  /* Game Hero */
-  .game-hero {
-    display: flex;
-    gap: 24px;
-    align-items: flex-start;
-    margin-bottom: 32px;
-    background: var(--card);
-    border: 1px solid var(--card-border);
-    border-radius: 16px;
-    padding: 28px;
-    position: relative;
-    overflow: hidden;
-  }
-
-  .game-hero::before {
-    content: '';
-    position: absolute;
-    top: 0; right: 0;
-    width: 300px; height: 100%;
-    background: linear-gradient(to left, rgba(255,77,77,0.04), transparent);
-    pointer-events: none;
-  }
-
-  .game-thumb-large {
-    width: 120px;
-    height: 120px;
-    border-radius: 14px;
-    object-fit: cover;
-    flex-shrink: 0;
-    border: 2px solid var(--card-border);
-  }
-
-  .game-details { flex: 1; }
-
-  .game-title {
-    font-size: 26px;
-    font-weight: 800;
-    letter-spacing: -0.5px;
-    margin-bottom: 6px;
-  }
-
-  .game-creator {
-    font-family: var(--mono);
-    font-size: 12px;
-    color: var(--text2);
-    margin-bottom: 14px;
-  }
-
-  .game-creator span { color: var(--accent); }
-
-  .game-tags {
-    display: flex;
-    gap: 8px;
-    flex-wrap: wrap;
-    margin-bottom: 14px;
-  }
-
-  .tag {
-    font-family: var(--mono);
-    font-size: 10px;
-    padding: 3px 10px;
-    border-radius: 20px;
-    letter-spacing: 0.5px;
-    text-transform: uppercase;
-  }
-
-  .tag-genre { background: rgba(77,159,255,0.1); color: var(--blue); border: 1px solid rgba(77,159,255,0.2); }
-  .tag-active { background: rgba(57,217,138,0.1); color: var(--green); border: 1px solid rgba(57,217,138,0.2); }
-  .tag-id { background: var(--bg3); color: var(--text3); border: 1px solid var(--card-border); }
-
-  .update-indicator {
-    position: absolute;
-    top: 20px;
-    right: 24px;
-    font-family: var(--mono);
-    font-size: 10px;
-    color: var(--green);
-    display: flex;
-    align-items: center;
-    gap: 5px;
-  }
-
-  /* ── STATS GRID ── */
-  .stats-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-    gap: 14px;
-    margin-bottom: 28px;
-  }
-
-  .stat-card {
-    background: var(--card);
-    border: 1px solid var(--card-border);
-    border-radius: 14px;
-    padding: 20px;
-    position: relative;
-    overflow: hidden;
-    transition: transform 0.15s, border-color 0.15s;
-  }
-
-  .stat-card:hover {
-    transform: translateY(-2px);
-    border-color: rgba(255,255,255,0.12);
-  }
-
-  .stat-card::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; right: 0;
-    height: 2px;
-    border-radius: 14px 14px 0 0;
-  }
-
-  .stat-card.green::before { background: var(--green); }
-  .stat-card.red::before { background: var(--accent); }
-  .stat-card.blue::before { background: var(--blue); }
-  .stat-card.purple::before { background: var(--purple); }
-  .stat-card.yellow::before { background: var(--yellow); }
-
-  .stat-label {
-    font-family: var(--mono);
-    font-size: 10px;
-    color: var(--text3);
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    margin-bottom: 10px;
-  }
-
-  .stat-value {
-    font-size: 28px;
-    font-weight: 800;
-    letter-spacing: -1px;
-    line-height: 1;
-    margin-bottom: 6px;
-  }
-
-  .stat-value.green { color: var(--green); }
-  .stat-value.red { color: var(--accent); }
-  .stat-value.blue { color: var(--blue); }
-  .stat-value.purple { color: var(--purple); }
-  .stat-value.yellow { color: var(--yellow); }
-
-  .stat-sub {
-    font-family: var(--mono);
-    font-size: 11px;
-    color: var(--text3);
-  }
-
-  /* ── CHART SECTION ── */
-  .section-title {
-    font-size: 14px;
-    font-weight: 700;
-    color: var(--text2);
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    margin-bottom: 14px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-
-  .section-title::after {
-    content: '';
-    flex: 1;
-    height: 1px;
-    background: var(--card-border);
-  }
-
-  .chart-card {
-    background: var(--card);
-    border: 1px solid var(--card-border);
-    border-radius: 16px;
-    padding: 24px;
-    margin-bottom: 28px;
-    position: relative;
-  }
-
-  .chart-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    margin-bottom: 20px;
-  }
-
-  .chart-title { font-size: 15px; font-weight: 700; }
-  .chart-sub { font-family: var(--mono); font-size: 11px; color: var(--text3); margin-top: 3px; }
-
-  .chart-tabs {
-    display: flex;
-    gap: 4px;
-    background: var(--bg3);
-    padding: 3px;
-    border-radius: 8px;
-  }
-
-  .chart-tab {
-    font-family: var(--mono);
-    font-size: 11px;
-    padding: 5px 12px;
-    border-radius: 6px;
-    cursor: pointer;
-    color: var(--text2);
-    transition: all 0.15s;
-    border: none;
-    background: none;
-  }
-
-  .chart-tab.active {
-    background: var(--card);
-    color: var(--text);
-    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-  }
-
-  canvas { width: 100% !important; }
-
-  /* ── BOTTOM GRID ── */
-  .bottom-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 14px;
-    margin-bottom: 28px;
-  }
-
-  @media (max-width: 640px) {
-    .bottom-grid { grid-template-columns: 1fr; }
-    .game-hero { flex-direction: column; }
-    .game-thumb-large { width: 80px; height: 80px; }
-    header { padding: 14px 16px; }
-    main { padding: 36px 16px 60px; }
-  }
-
-  .info-card {
-    background: var(--card);
-    border: 1px solid var(--card-border);
-    border-radius: 16px;
-    padding: 20px;
-  }
-
-  .info-card h3 {
-    font-size: 13px;
-    font-weight: 700;
-    margin-bottom: 14px;
-    color: var(--text2);
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    font-family: var(--mono);
-  }
-
-  /* Servers list */
-  .servers-list { display: flex; flex-direction: column; gap: 8px; }
-
-  .server-row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    background: var(--bg3);
-    border-radius: 8px;
-    padding: 10px 12px;
-    font-family: var(--mono);
-    font-size: 12px;
-  }
-
-  .server-id { color: var(--text3); }
-  .server-players { color: var(--green); }
-  .server-ping {
-    padding: 2px 8px;
-    border-radius: 20px;
-    font-size: 10px;
-  }
-
-  .ping-low { background: rgba(57,217,138,0.1); color: var(--green); }
-  .ping-med { background: rgba(251,191,36,0.1); color: var(--yellow); }
-  .ping-high { background: rgba(255,77,77,0.1); color: var(--accent); }
-
-  /* Description */
-  .game-desc {
-    font-family: var(--mono);
-    font-size: 12px;
-    color: var(--text2);
-    line-height: 1.7;
-  }
-
-  /* Ratings bar */
-  .rating-bar-wrap {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 10px;
-  }
-
-  .rating-label { font-family: var(--mono); font-size: 11px; color: var(--text2); width: 50px; }
-
-  .rating-bar {
-    flex: 1;
-    height: 6px;
-    background: var(--bg3);
-    border-radius: 3px;
-    overflow: hidden;
-  }
-
-  .rating-fill {
-    height: 100%;
-    border-radius: 3px;
-    transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
-    width: 0;
-  }
-
-  .rating-pct { font-family: var(--mono); font-size: 11px; color: var(--text3); width: 35px; text-align: right; }
-
-  /* Loading skeleton */
-  .skeleton {
-    background: linear-gradient(90deg, var(--bg3) 0%, var(--bg2) 50%, var(--bg3) 100%);
-    background-size: 200% 100%;
-    animation: shimmer 1.5s infinite;
-    border-radius: 4px;
-  }
-
-  @keyframes shimmer {
-    0% { background-position: 200% 0; }
-    100% { background-position: -200% 0; }
-  }
-
-  /* Empty state */
-  .empty-state {
-    text-align: center;
-    padding: 80px 20px;
-  }
-
-  .empty-icon {
-    font-size: 48px;
-    margin-bottom: 16px;
-    opacity: 0.3;
-  }
-
-  .empty-title {
-    font-size: 18px;
-    font-weight: 700;
-    color: var(--text2);
-    margin-bottom: 8px;
-  }
-
-  .empty-sub {
-    font-family: var(--mono);
-    font-size: 12px;
-    color: var(--text3);
-  }
-
-  /* Animations */
-  @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-
-  .fade-in {
-    animation: fadeIn 0.4s ease forwards;
-  }
-
-  .loading-spinner {
-    display: inline-block;
-    width: 18px;
-    height: 18px;
-    border: 2px solid rgba(255,77,77,0.2);
-    border-top-color: var(--accent);
-    border-radius: 50%;
-    animation: spin 0.7s linear infinite;
-  }
-
-  @keyframes spin {
-    to { transform: rotate(360deg); }
-  }
-
-  .search-loading {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 40px;
-    gap: 12px;
-    font-family: var(--mono);
-    font-size: 13px;
-    color: var(--text2);
-  }
-
-  /* Error message */
-  .error-msg {
-    background: rgba(255,77,77,0.08);
-    border: 1px solid rgba(255,77,77,0.2);
-    border-radius: 10px;
-    padding: 16px 20px;
-    font-family: var(--mono);
-    font-size: 13px;
-    color: var(--accent);
-    text-align: center;
-  }
-
-  /* Tooltip */
-  .tooltip-area { position: relative; }
-
-  /* Progress ring */
-  .progress-ring {
-    transform: rotate(-90deg);
-  }
-
-  .ring-bg { fill: none; stroke: var(--bg3); stroke-width: 6; }
-  .ring-fill {
-    fill: none;
-    stroke-width: 6;
-    stroke-linecap: round;
-    transition: stroke-dashoffset 1.2s cubic-bezier(0.4, 0, 0.2, 1);
-  }
-
-  #update-timer-bar {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    height: 2px;
-    background: var(--accent);
-    border-radius: 0 0 16px 16px;
-    transition: width linear;
-  }
+:root {
+  --bg:        #06070a;
+  --bg2:       #0a0c12;
+  --bg3:       #0f1118;
+  --bg4:       #141720;
+  --card:      #0d0f17;
+  --card2:     #111420;
+  --border:    rgba(255,255,255,0.055);
+  --border2:   rgba(255,255,255,0.10);
+  --border3:   rgba(99,160,255,0.18);
+  --text:      #f0f2fa;
+  --text2:     #6b7494;
+  --text3:     #383d54;
+  --accent:    #3d8bff;
+  --accent-dk: #2563eb;
+  --accent-glow: rgba(61,139,255,0.12);
+  --blue-dim:  rgba(61,139,255,0.08);
+  --green:     #34d399;
+  --red:       #f87171;
+  --yellow:    #fbbf24;
+  --sans:      'Plus Jakarta Sans', sans-serif;
+  --mono:      'JetBrains Mono', monospace;
+  --radius:    10px;
+  --radius-sm: 7px;
+  --shadow:    0 8px 32px rgba(0,0,0,0.55);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--sans);
+  font-size: 14px;
+  line-height: 1.5;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+a { text-decoration: none; color: inherit; }
+button { cursor: pointer; font-family: var(--sans); }
+img { display: block; }
+
+body::before {
+  content: '';
+  position: fixed;
+  top: -180px; left: 50%;
+  transform: translateX(-50%);
+  width: 800px; height: 500px;
+  background: radial-gradient(ellipse, rgba(61,139,255,0.05) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--bg4); border-radius: 3px; }
+
+/* ── NAV ── */
+nav {
+  position: sticky; top: 0; z-index: 100;
+  background: rgba(6,7,10,0.88);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
+  height: 56px;
+  display: flex; align-items: center;
+  padding: 0 28px; gap: 28px;
+}
+
+.nav-logo {
+  display: flex; align-items: center; gap: 9px;
+  font-size: 16px; font-weight: 800; letter-spacing: -0.4px;
+  flex-shrink: 0; cursor: pointer;
+}
+.nav-logo-mark {
+  width: 28px; height: 28px;
+  background: var(--accent); border-radius: 6px;
+  display: grid; place-items: center;
+}
+.nav-logo-mark svg { width: 15px; height: 15px; }
+.nav-logo-text { color: #fff; }
+.nav-logo-text span { color: var(--accent); }
+
+.nav-links { display: flex; align-items: center; gap: 2px; flex: 1; }
+.nav-link {
+  padding: 5px 12px; border-radius: var(--radius-sm);
+  font-size: 13px; font-weight: 600; color: var(--text2);
+  transition: color 0.14s, background 0.14s; border: none; background: none;
+}
+.nav-link:hover { color: var(--text); background: var(--bg4); }
+.nav-link.active { color: #fff; background: var(--bg4); }
+
+.nav-right { display: flex; align-items: center; gap: 10px; margin-left: auto; }
+
+.nav-search { position: relative; width: 240px; }
+.nav-search input {
+  width: 100%; background: var(--bg3); border: 1px solid var(--border);
+  border-radius: var(--radius-sm); padding: 7px 12px 7px 32px;
+  font-family: var(--sans); font-size: 13px; color: var(--text); outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.nav-search input:focus { border-color: var(--border3); box-shadow: 0 0 0 3px var(--accent-glow); }
+.nav-search input::placeholder { color: var(--text3); }
+.nav-search-icon {
+  position: absolute; left: 10px; top: 50%; transform: translateY(-50%);
+  pointer-events: none; color: var(--text3);
+}
+.nav-search-icon svg { width: 13px; height: 13px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; }
+
+.search-dropdown {
+  display: none; position: absolute;
+  top: calc(100% + 6px); left: 0; right: 0;
+  background: var(--bg2); border: 1px solid var(--border2);
+  border-radius: var(--radius); box-shadow: var(--shadow);
+  z-index: 200; overflow: hidden; max-height: 380px; overflow-y: auto;
+  min-width: 320px;
+}
+.search-dropdown.open { display: block; }
+
+.dropdown-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 14px; cursor: pointer;
+  transition: background 0.1s; border-bottom: 1px solid var(--border);
+}
+.dropdown-item:last-child { border-bottom: none; }
+.dropdown-item:hover { background: var(--bg4); }
+.dropdown-thumb { width: 38px; height: 38px; border-radius: 6px; object-fit: cover; flex-shrink: 0; background: var(--bg4); }
+.dropdown-info { flex: 1; min-width: 0; }
+.dropdown-name { font-size: 13px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.dropdown-creator { font-size: 11px; color: var(--text2); font-family: var(--mono); }
+.dropdown-ccu { font-family: var(--mono); font-size: 11px; color: var(--green); flex-shrink: 0; }
+.dropdown-loading, .dropdown-empty {
+  padding: 18px; text-align: center; color: var(--text2); font-size: 12px; font-family: var(--mono);
+}
+
+.live-badge {
+  display: flex; align-items: center; gap: 6px;
+  background: var(--bg3); border: 1px solid var(--border);
+  border-radius: 20px; padding: 5px 12px;
+  font-family: var(--mono); font-size: 11px;
+  white-space: nowrap; cursor: default; color: var(--text2);
+}
+.live-dot {
+  width: 6px; height: 6px; background: var(--green);
+  border-radius: 50%; animation: blink 2s ease-in-out infinite;
+}
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.2} }
+
+/* ── PAGE ── */
+.page { position: relative; z-index: 1; }
+#home-page { display: block; }
+#game-page  { display: none; }
+
+/* ── HERO ── */
+.hero {
+  padding: 56px 28px 36px; max-width: 1280px; margin: 0 auto;
+  display: flex; flex-direction: column; align-items: center; text-align: center; gap: 18px;
+}
+.hero-eyebrow {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: var(--blue-dim); border: 1px solid var(--border3);
+  border-radius: 20px; padding: 5px 14px;
+  font-family: var(--mono); font-size: 11px; color: var(--accent);
+  letter-spacing: 0.4px; text-transform: uppercase;
+}
+.hero-eyebrow-dot {
+  width: 5px; height: 5px; background: var(--accent);
+  border-radius: 50%; animation: blink 2s ease-in-out infinite;
+}
+.hero-title {
+  font-size: clamp(28px, 4.5vw, 50px); font-weight: 800;
+  letter-spacing: -1.5px; line-height: 1.08; color: #fff;
+}
+.hero-title em { font-style: normal; color: var(--accent); }
+
+.hero-search-wrap { width: 100%; max-width: 540px; position: relative; }
+.hero-search-box {
+  display: flex; align-items: center; gap: 6px;
+  background: var(--card2); border: 1px solid var(--border2);
+  border-radius: 11px; padding: 5px 5px 5px 16px;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.hero-search-box:focus-within { border-color: var(--border3); box-shadow: 0 0 0 4px var(--accent-glow); }
+.hero-search-box input {
+  flex: 1; background: none; border: none; outline: none;
+  font-family: var(--sans); font-size: 14px; font-weight: 600; color: var(--text);
+}
+.hero-search-box input::placeholder { color: var(--text3); font-weight: 400; }
+.hero-search-btn {
+  background: var(--accent); color: #fff; border: none;
+  padding: 9px 20px; border-radius: 8px;
+  font-size: 13px; font-weight: 700;
+  transition: background 0.14s, transform 0.1s, box-shadow 0.14s;
+}
+.hero-search-btn:hover { background: var(--accent-dk); transform: translateY(-1px); box-shadow: 0 4px 16px rgba(61,139,255,0.35); }
+
+.hero-search-dropdown {
+  position: absolute; top: calc(100% + 7px); left: 0; right: 0;
+  background: var(--bg2); border: 1px solid var(--border2);
+  border-radius: var(--radius); box-shadow: var(--shadow);
+  z-index: 200; display: none; overflow: hidden; max-height: 420px; overflow-y: auto;
+}
+.hero-search-dropdown.open { display: block; }
+
+/* ── GLOBAL STATS ── */
+.global-stats {
+  display: flex; gap: 12px; flex-wrap: wrap; justify-content: center;
+  max-width: 1280px; margin: 0 auto; padding: 0 28px 40px;
+}
+.global-stat {
+  flex: 1; min-width: 155px; max-width: 210px;
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 18px 20px; position: relative; overflow: hidden;
+  transition: border-color 0.15s, transform 0.15s;
+}
+.global-stat:hover { border-color: var(--border2); transform: translateY(-2px); }
+.global-stat::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
+}
+.gs-blue::before  { background: linear-gradient(90deg, transparent, var(--accent), transparent); }
+.gs-white::before { background: linear-gradient(90deg, transparent, rgba(255,255,255,0.25), transparent); }
+.gs-green::before { background: linear-gradient(90deg, transparent, var(--green), transparent); }
+.gs-dim::before   { background: linear-gradient(90deg, transparent, var(--text3), transparent); }
+.gs-label { font-family: var(--mono); font-size: 10px; color: var(--text3); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
+.gs-value { font-size: 23px; font-weight: 800; letter-spacing: -0.5px; line-height: 1; margin-bottom: 4px; color: #fff; }
+.gs-blue  .gs-value { color: var(--accent); }
+.gs-green .gs-value { color: var(--green); }
+.gs-sub { font-family: var(--mono); font-size: 10px; color: var(--text3); }
+
+/* ── SECTIONS ── */
+.section { max-width: 1280px; margin: 0 auto; padding: 0 28px 44px; }
+.section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+.section-label { display: flex; align-items: center; gap: 10px; }
+.label-tag {
+  font-family: var(--mono); font-size: 10px; padding: 3px 9px; border-radius: 20px;
+  font-weight: 600; letter-spacing: 0.4px; text-transform: uppercase;
+}
+.tag-blue  { background: var(--blue-dim); color: var(--accent); border: 1px solid var(--border3); }
+.tag-white { background: rgba(255,255,255,0.04); color: rgba(255,255,255,0.45); border: 1px solid var(--border); }
+.tag-green { background: rgba(52,211,153,0.07); color: var(--green); border: 1px solid rgba(52,211,153,0.18); }
+.section-title { font-size: 17px; font-weight: 800; letter-spacing: -0.3px; color: #fff; }
+.see-all {
+  font-size: 11px; font-family: var(--mono); color: var(--accent);
+  background: var(--blue-dim); border: 1px solid var(--border3); border-radius: 20px;
+  padding: 5px 14px; transition: all 0.14s;
+}
+.see-all:hover { background: rgba(61,139,255,0.14); }
+
+/* ── GAME CARDS ── */
+.games-row {
+  display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px;
+}
+@media (max-width: 1100px) { .games-row { grid-template-columns: repeat(4, 1fr); } }
+@media (max-width: 840px)  { .games-row { grid-template-columns: repeat(3, 1fr); } }
+@media (max-width: 560px)  { .games-row { grid-template-columns: repeat(2, 1fr); } }
+
+.game-card {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: var(--radius); overflow: hidden; cursor: pointer;
+  transition: border-color 0.15s, transform 0.15s, box-shadow 0.15s;
+  animation: fadeUp 0.3s ease forwards; opacity: 0;
+}
+.game-card:hover { border-color: var(--border2); transform: translateY(-3px); box-shadow: 0 8px 28px rgba(0,0,0,0.4); }
+
+@keyframes fadeUp { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
+
+.card-thumb-wrap { width: 100%; aspect-ratio: 1; overflow: hidden; background: var(--bg4); position: relative; }
+.card-thumb { width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s; }
+.game-card:hover .card-thumb { transform: scale(1.05); }
+
+.card-rank {
+  position: absolute; top: 7px; left: 7px;
+  background: rgba(0,0,0,0.65); backdrop-filter: blur(6px);
+  font-family: var(--mono); font-size: 10px; font-weight: 600;
+  padding: 2px 7px; border-radius: 20px; color: rgba(255,255,255,0.5);
+}
+.card-badge {
+  position: absolute; top: 7px; right: 7px;
+  font-size: 9px; padding: 2px 7px; border-radius: 20px;
+  font-family: var(--mono); font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px;
+}
+.badge-hot { background: rgba(61,139,255,0.9); color: #fff; }
+.badge-up  { background: rgba(52,211,153,0.9); color: #000; }
+
+.card-body { padding: 10px 11px 12px; }
+.card-name { font-size: 12px; font-weight: 700; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #fff; }
+.card-creator { font-size: 11px; color: var(--text2); margin-bottom: 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-family: var(--mono); }
+.card-stats { display: flex; align-items: center; justify-content: space-between; }
+.card-ccu { font-family: var(--mono); font-size: 12px; font-weight: 600; color: var(--green); }
+.card-trend { font-family: var(--mono); font-size: 10px; padding: 1px 6px; border-radius: 4px; }
+.trend-up   { color: var(--green); background: rgba(52,211,153,0.08); }
+.trend-down { color: var(--red);   background: rgba(248,113,113,0.08); }
+
+.skeleton-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+.skel-thumb { width: 100%; aspect-ratio: 1; background: linear-gradient(90deg, var(--bg3) 0%, var(--bg4) 50%, var(--bg3) 100%); background-size: 200% 100%; animation: shimmer 1.6s infinite; }
+.skel-body { padding: 10px 11px 12px; }
+.skel-line { height: 11px; border-radius: 4px; margin-bottom: 6px; background: linear-gradient(90deg, var(--bg3) 0%, var(--bg4) 50%, var(--bg3) 100%); background-size: 200% 100%; animation: shimmer 1.6s infinite; }
+.skel-line.short { width: 65%; }
+.skel-line.tiny  { width: 40%; }
+@keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+
+/* ── GAME DETAIL ── */
+.game-page-inner { max-width: 1280px; margin: 0 auto; padding: 28px 28px 60px; }
+.breadcrumb { display: flex; align-items: center; gap: 6px; font-family: var(--mono); font-size: 11px; color: var(--text3); margin-bottom: 22px; }
+.breadcrumb a { cursor: pointer; transition: color 0.12s; }
+.breadcrumb a:hover { color: var(--text2); }
+.breadcrumb-sep { color: var(--text3); }
+
+.game-header {
+  display: flex; gap: 22px;
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 14px; padding: 26px; margin-bottom: 18px; position: relative; overflow: hidden;
+}
+.game-header::after {
+  content: ''; position: absolute; inset: 0;
+  background: radial-gradient(ellipse at top right, rgba(61,139,255,0.03) 0%, transparent 55%);
+  pointer-events: none;
+}
+.gh-thumb { width: 120px; height: 120px; border-radius: 12px; object-fit: cover; flex-shrink: 0; border: 1px solid var(--border); }
+.gh-info { flex: 1; min-width: 0; }
+.gh-title { font-size: 24px; font-weight: 800; letter-spacing: -0.5px; margin-bottom: 4px; color: #fff; }
+.gh-creator { font-family: var(--mono); font-size: 12px; color: var(--text2); margin-bottom: 12px; }
+.gh-creator strong { color: var(--accent); }
+.gh-tags { display: flex; gap: 7px; flex-wrap: wrap; margin-bottom: 12px; }
+.gh-tag { font-family: var(--mono); font-size: 10px; padding: 2px 9px; border-radius: 20px; text-transform: uppercase; letter-spacing: 0.3px; border: 1px solid; }
+.ght-genre  { color: var(--accent); border-color: var(--border3); background: var(--blue-dim); }
+.ght-active { color: var(--green);  border-color: rgba(52,211,153,0.2); background: rgba(52,211,153,0.07); }
+.ght-id     { color: var(--text3);  border-color: var(--border); background: var(--bg3); }
+.gh-desc { font-size: 13px; color: var(--text2); line-height: 1.65; max-width: 580px; }
+.gh-right { display: flex; flex-direction: column; align-items: flex-end; gap: 10px; flex-shrink: 0; }
+.update-status { display: flex; align-items: center; gap: 5px; font-family: var(--mono); font-size: 10px; color: var(--green); }
+.refresh-btn {
+  background: var(--bg3); border: 1px solid var(--border);
+  border-radius: var(--radius-sm); padding: 8px 14px;
+  font-size: 12px; font-weight: 600; color: var(--text2);
+  display: flex; align-items: center; gap: 6px; transition: all 0.14s;
+}
+.refresh-btn:hover { border-color: var(--border2); color: var(--text); }
+.refresh-btn.spinning svg { animation: spin 0.7s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.stats-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-bottom: 18px; }
+@media (max-width: 900px) { .stats-grid { grid-template-columns: repeat(3, 1fr); } }
+@media (max-width: 560px) { .stats-grid { grid-template-columns: repeat(2, 1fr); } }
+
+.stat-tile {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 17px; position: relative; overflow: hidden;
+  transition: border-color 0.14s;
+}
+.stat-tile:hover { border-color: var(--border2); }
+.stat-tile::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px; }
+.st-blue::before   { background: linear-gradient(90deg, transparent, var(--accent), transparent); }
+.st-white::before  { background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent); }
+.st-green::before  { background: linear-gradient(90deg, transparent, var(--green), transparent); }
+.st-red::before    { background: linear-gradient(90deg, transparent, var(--red), transparent); }
+.st-yellow::before { background: linear-gradient(90deg, transparent, var(--yellow), transparent); }
+.st-label { font-family: var(--mono); font-size: 10px; color: var(--text3); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
+.st-value { font-size: 24px; font-weight: 800; letter-spacing: -0.5px; line-height: 1; margin-bottom: 3px; color: #fff; }
+.st-blue   .st-value { color: var(--accent); }
+.st-green  .st-value { color: var(--green); }
+.st-red    .st-value { color: var(--red); }
+.st-yellow .st-value { color: var(--yellow); }
+.st-sub { font-family: var(--mono); font-size: 10px; color: var(--text3); }
+
+.chart-row { display: grid; grid-template-columns: 2fr 1fr; gap: 12px; margin-bottom: 18px; }
+@media (max-width: 780px) { .chart-row { grid-template-columns: 1fr; } }
+
+.panel { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px; position: relative; }
+.panel-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+.panel-title { font-size: 13px; font-weight: 700; color: #fff; }
+.panel-sub   { font-family: var(--mono); font-size: 10px; color: var(--text3); margin-top: 2px; }
+
+.tab-group { display: flex; gap: 2px; background: var(--bg3); padding: 3px; border-radius: 7px; }
+.tab { font-family: var(--mono); font-size: 11px; padding: 4px 10px; border-radius: 5px; background: none; border: none; color: var(--text2); transition: all 0.12s; }
+.tab.active { background: var(--card2); color: #fff; box-shadow: 0 1px 4px rgba(0,0,0,0.35); }
+
+.chart-wrap { position: relative; height: 190px; }
+.timer-bar { position: absolute; bottom: 0; left: 0; height: 2px; background: var(--accent); border-radius: 0 0 var(--radius) var(--radius); transition: width 0.1s linear; }
+
+.servers-table { display: flex; flex-direction: column; gap: 5px; }
+.server-row {
+  display: flex; align-items: center; justify-content: space-between;
+  background: var(--bg3); border-radius: 7px; padding: 7px 11px;
+  font-family: var(--mono); font-size: 11px;
+}
+.srv-id  { color: var(--text3); }
+.srv-pl  { color: var(--green); }
+.srv-ping { padding: 1px 7px; border-radius: 20px; font-size: 10px; }
+.ping-g { background: rgba(52,211,153,0.1); color: var(--green); }
+.ping-y { background: rgba(251,191,36,0.1);  color: var(--yellow); }
+.ping-r { background: rgba(248,113,113,0.1); color: var(--red); }
+
+.rating-row { display: flex; align-items: center; gap: 10px; margin-bottom: 9px; }
+.r-label { font-size: 12px; width: 58px; flex-shrink: 0; color: var(--text2); }
+.r-bar   { flex: 1; height: 6px; background: var(--bg3); border-radius: 3px; overflow: hidden; }
+.r-fill  { height: 100%; border-radius: 3px; width: 0; transition: width 1s cubic-bezier(.4,0,.2,1); }
+.r-pct   { font-family: var(--mono); font-size: 11px; color: var(--text2); width: 36px; text-align: right; }
+
+.info-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+@media (max-width: 600px) { .info-row { grid-template-columns: 1fr; } }
+.info-divider { height: 1px; background: var(--border); margin: 10px 0; }
+
+footer { border-top: 1px solid var(--border); padding: 20px 28px; text-align: center; font-family: var(--mono); font-size: 11px; color: var(--text3); }
+
+.error-box { background: rgba(248,113,113,0.05); border: 1px solid rgba(248,113,113,0.15); border-radius: var(--radius); padding: 16px; text-align: center; font-family: var(--mono); font-size: 12px; color: var(--red); }
+
+#toast {
+  position: fixed; bottom: 24px; left: 50%;
+  transform: translateX(-50%) translateY(16px);
+  background: var(--card2); border: 1px solid var(--border2);
+  border-radius: var(--radius-sm); padding: 9px 18px;
+  font-size: 13px; box-shadow: var(--shadow); z-index: 999;
+  opacity: 0; transition: opacity 0.2s, transform 0.2s; pointer-events: none;
+  font-family: var(--mono); color: var(--text2);
+}
+#toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+@media (max-width: 600px) {
+  nav { gap: 12px; padding: 0 16px; }
+  .nav-links { display: none; }
+  .nav-search { width: 170px; }
+  .game-header { flex-direction: column; }
+  .gh-right { flex-direction: row; align-items: center; }
+}
 </style>
 </head>
 <body>
 
-<header>
-  <div class="logo">
-    <div class="logo-icon">🎮</div>
-    <span class="logo-text">Ro<span>Stats</span></span>
-  </div>
-  <div class="header-badge">
-    <div class="pulse-dot"></div>
-    Live Data
-  </div>
-</header>
-
-<main>
-  <!-- Hero -->
-  <div class="hero fade-in">
-    <div class="hero-tag">🔴 Real-time Analytics</div>
-    <h1>Track Any<br><em>Roblox Game</em></h1>
-    <p>Live CCU, server stats, player counts, and performance charts — updated automatically.</p>
-  </div>
-
-  <!-- Search -->
-  <div class="search-wrapper fade-in">
-    <div class="search-box">
-      <span class="search-icon">🔍</span>
-      <input type="text" id="searchInput" placeholder="Search games by name or paste a game ID..." autocomplete="off" />
-      <button class="search-btn" onclick="handleSearch()">Search</button>
+<nav>
+  <div class="nav-logo" onclick="goHome()">
+    <div class="nav-logo-mark">
+      <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M8 1.5L13.5 4.5V11.5L8 14.5L2.5 11.5V4.5L8 1.5Z" fill="white" opacity="0.85"/>
+        <path d="M8 5L11 6.75V10.25L8 12L5 10.25V6.75L8 5Z" fill="#06070a"/>
+      </svg>
     </div>
-    <div class="suggestions">
-      <span class="suggestion-chip" onclick="quickSearch('Adopt Me')">Adopt Me</span>
-      <span class="suggestion-chip" onclick="quickSearch('Brookhaven')">Brookhaven</span>
-      <span class="suggestion-chip" onclick="quickSearch('Blox Fruits')">Blox Fruits</span>
-      <span class="suggestion-chip" onclick="quickSearch('Livetopia')">Livetopia</span>
-      <span class="suggestion-chip" onclick="quickSearch('Pet Simulator X')">Pet Sim X</span>
-      <span class="suggestion-chip" onclick="quickSearch('Murder Mystery 2')">Murder Mystery 2</span>
+    <span class="nav-logo-text">Ro<span>Stats</span></span>
+  </div>
+
+  <div class="nav-links">
+    <button class="nav-link active" onclick="goHome()">Home</button>
+    <button class="nav-link" onclick="showSection('top')">Top Games</button>
+    <button class="nav-link" onclick="showSection('trending')">Trending</button>
+    <button class="nav-link" onclick="showSection('new')">New &amp; Rising</button>
+  </div>
+
+  <div class="nav-right">
+    <div class="nav-search">
+      <span class="nav-search-icon">
+        <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      </span>
+      <input type="text" id="navSearchInput" placeholder="Search games…" autocomplete="off"/>
+      <div class="search-dropdown" id="navDropdown"></div>
+    </div>
+    <div class="live-badge" id="navCCU">
+      <div class="live-dot"></div>
+      <span>Loading…</span>
     </div>
   </div>
+</nav>
 
-  <!-- Results Section -->
-  <div id="results-section">
-    <div id="searchResultsContainer"></div>
-  </div>
+<div class="page">
 
-  <!-- Game Dashboard -->
-  <div id="game-dashboard">
-    <div class="back-btn" onclick="showSearch()">← Back to results</div>
-    
-    <!-- Game Hero -->
-    <div class="game-hero">
-      <img id="gameThumb" class="game-thumb-large" src="" alt="Game thumbnail" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22120%22 height=%22120%22><rect fill=%22%231a1a24%22 width=%22120%22 height=%22120%22/><text x=%2250%25%22 y=%2250%25%22 dominant-baseline=%22middle%22 text-anchor=%22middle%22 font-size=%2240%22>🎮</text></svg>'" />
-      <div class="game-details">
-        <div class="game-title" id="gameTitle">—</div>
-        <div class="game-creator">by <span id="gameCreator">—</span></div>
-        <div class="game-tags">
-          <span class="tag tag-active">● Active</span>
-          <span class="tag tag-genre" id="gameGenre">Game</span>
-          <span class="tag tag-id" id="gameId">ID: —</span>
+  <div id="home-page">
+
+    <div class="hero">
+      <div class="hero-eyebrow">
+        <div class="hero-eyebrow-dot"></div>
+        Live Roblox Analytics
+      </div>
+      <h1 class="hero-title">What's trending on<br><em>Roblox?</em></h1>
+      <div class="hero-search-wrap">
+        <div class="hero-search-box">
+          <input type="text" id="heroSearchInput" placeholder="Search any Roblox game or paste a game ID…" autocomplete="off"/>
+          <button class="hero-search-btn" onclick="triggerHeroSearch()">Search</button>
         </div>
-      </div>
-      <div class="update-indicator">
-        <div class="pulse-dot"></div>
-        <span id="lastUpdated">updating...</span>
+        <div class="hero-search-dropdown" id="heroDropdown"></div>
       </div>
     </div>
 
-    <!-- Stats Grid -->
-    <div class="section-title">Live Statistics</div>
-    <div class="stats-grid">
-      <div class="stat-card green">
-        <div class="stat-label">Current CCU</div>
-        <div class="stat-value green" id="statCCU">—</div>
-        <div class="stat-sub" id="statCCUSub">players online</div>
+    <div class="global-stats">
+      <div class="global-stat gs-blue">
+        <div class="gs-label">Total Players Online</div>
+        <div class="gs-value" id="gs-ccu">—</div>
+        <div class="gs-sub">concurrent users</div>
       </div>
-      <div class="stat-card red">
-        <div class="stat-label">Peak CCU (24h)</div>
-        <div class="stat-value red" id="statPeak">—</div>
-        <div class="stat-sub" id="statPeakSub">all-time recorded</div>
+      <div class="global-stat gs-white">
+        <div class="gs-label">Peak CCU</div>
+        <div class="gs-value" id="gs-peak">—</div>
+        <div class="gs-sub">all-time record</div>
       </div>
-      <div class="stat-card blue">
-        <div class="stat-label">Active Servers</div>
-        <div class="stat-value blue" id="statServers">—</div>
-        <div class="stat-sub">running instances</div>
+      <div class="global-stat gs-green">
+        <div class="gs-label">Active Games</div>
+        <div class="gs-value" id="gs-games">—</div>
+        <div class="gs-sub">with players now</div>
       </div>
-      <div class="stat-card purple">
-        <div class="stat-label">Total Visits</div>
-        <div class="stat-value purple" id="statVisits">—</div>
-        <div class="stat-sub">all time</div>
-      </div>
-      <div class="stat-card yellow">
-        <div class="stat-label">Favourites</div>
-        <div class="stat-value yellow" id="statFavs">—</div>
-        <div class="stat-sub">players favourited</div>
+      <div class="global-stat gs-dim">
+        <div class="gs-label">Active Servers</div>
+        <div class="gs-value" id="gs-servers">—</div>
+        <div class="gs-sub">running globally</div>
       </div>
     </div>
 
-    <!-- CCU Chart -->
-    <div class="section-title">Concurrent Players</div>
-    <div class="chart-card" style="position:relative">
-      <div class="chart-header">
-        <div>
-          <div class="chart-title">CCU Over Time</div>
-          <div class="chart-sub">Auto-refreshes every 30 seconds</div>
+    <div class="section" id="section-trending">
+      <div class="section-header">
+        <div class="section-label">
+          <span class="label-tag tag-blue">Trending</span>
+          <span class="section-title">Top Moving Games</span>
         </div>
-        <div class="chart-tabs">
-          <button class="chart-tab active" onclick="setChartRange('1h', this)">1H</button>
-          <button class="chart-tab" onclick="setChartRange('6h', this)">6H</button>
-          <button class="chart-tab" onclick="setChartRange('24h', this)">24H</button>
-        </div>
+        <button class="see-all">Explore all</button>
       </div>
-      <canvas id="ccuChart" height="220"></canvas>
-      <div id="update-timer-bar" style="width:100%"></div>
+      <div class="games-row" id="row-trending"></div>
     </div>
 
-    <!-- Bottom Grid -->
-    <div class="section-title">Servers & Info</div>
-    <div class="bottom-grid">
-      <!-- Servers -->
-      <div class="info-card">
-        <h3>🖥 Live Servers</h3>
-        <div class="servers-list" id="serversList">
-          <div class="search-loading"><div class="loading-spinner"></div> Loading servers...</div>
+    <div class="section" id="section-new">
+      <div class="section-header">
+        <div class="section-label">
+          <span class="label-tag tag-green">New</span>
+          <span class="section-title">New &amp; Rising</span>
         </div>
+        <button class="see-all">Explore all</button>
+      </div>
+      <div class="games-row" id="row-new"></div>
+    </div>
+
+    <div class="section" id="section-top">
+      <div class="section-header">
+        <div class="section-label">
+          <span class="label-tag tag-white">Top</span>
+          <span class="section-title">Top by Players</span>
+        </div>
+        <button class="see-all">Explore all</button>
+      </div>
+      <div class="games-row" id="row-top"></div>
+    </div>
+
+  </div>
+
+  <div id="game-page">
+    <div class="game-page-inner">
+
+      <div class="breadcrumb">
+        <a onclick="goHome()">Home</a>
+        <span class="breadcrumb-sep">/</span>
+        <a onclick="goHome()">Games</a>
+        <span class="breadcrumb-sep">/</span>
+        <span id="bc-name">Loading…</span>
       </div>
 
-      <!-- Ratings & Description -->
-      <div class="info-card">
-        <h3>👍 Player Ratings</h3>
-        <div id="ratingsSection">
-          <div class="rating-bar-wrap">
-            <span class="rating-label">👍 Like</span>
-            <div class="rating-bar"><div class="rating-fill" id="likeBar" style="background: var(--green)"></div></div>
-            <span class="rating-pct" id="likePct">—</span>
+      <div class="game-header">
+        <img id="gp-thumb" class="gh-thumb" src="" alt="Game thumbnail"
+          onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22120%22 height=%22120%22><rect fill=%22%230f1118%22 width=%22120%22 height=%22120%22/></svg>'"/>
+        <div class="gh-info">
+          <div class="gh-title" id="gp-title">—</div>
+          <div class="gh-creator">by <strong id="gp-creator">—</strong></div>
+          <div class="gh-tags">
+            <span class="gh-tag ght-active">Active</span>
+            <span class="gh-tag ght-genre" id="gp-genre">Game</span>
+            <span class="gh-tag ght-id" id="gp-id">ID: —</span>
           </div>
-          <div class="rating-bar-wrap">
-            <span class="rating-label">👎 Dislike</span>
-            <div class="rating-bar"><div class="rating-fill" id="dislikeBar" style="background: var(--accent)"></div></div>
-            <span class="rating-pct" id="dislikePct">—</span>
+          <div class="gh-desc" id="gp-desc">Loading description…</div>
+        </div>
+        <div class="gh-right">
+          <div class="update-status">
+            <div class="live-dot"></div>
+            <span id="gp-updated">updating…</span>
+          </div>
+          <button class="refresh-btn" id="refreshBtn" onclick="manualRefresh()">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/>
+              <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+            </svg>
+            Refresh
+          </button>
+        </div>
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat-tile st-green">
+          <div class="st-label">Current CCU</div>
+          <div class="st-value" id="st-ccu">—</div>
+          <div class="st-sub" id="st-ccu-sub">players online</div>
+        </div>
+        <div class="stat-tile st-red">
+          <div class="st-label">Peak CCU</div>
+          <div class="st-value" id="st-peak">—</div>
+          <div class="st-sub">session peak</div>
+        </div>
+        <div class="stat-tile st-blue">
+          <div class="st-label">Active Servers</div>
+          <div class="st-value" id="st-servers">—</div>
+          <div class="st-sub">running instances</div>
+        </div>
+        <div class="stat-tile st-white">
+          <div class="st-label">Total Visits</div>
+          <div class="st-value" id="st-visits">—</div>
+          <div class="st-sub">all time</div>
+        </div>
+        <div class="stat-tile st-yellow">
+          <div class="st-label">Favourites</div>
+          <div class="st-value" id="st-favs">—</div>
+          <div class="st-sub">total</div>
+        </div>
+      </div>
+
+      <div class="chart-row">
+        <div class="panel" id="chartPanel">
+          <div class="panel-header">
+            <div>
+              <div class="panel-title">Concurrent Players</div>
+              <div class="panel-sub">Auto-refreshes every 30 seconds</div>
+            </div>
+            <div class="tab-group">
+              <button class="tab active" onclick="setRange('1h',this)">1H</button>
+              <button class="tab" onclick="setRange('6h',this)">6H</button>
+              <button class="tab" onclick="setRange('24h',this)">24H</button>
+            </div>
+          </div>
+          <div class="chart-wrap"><canvas id="ccuCanvas"></canvas></div>
+          <div class="timer-bar" id="timerBar"></div>
+        </div>
+        <div class="panel">
+          <div class="panel-header">
+            <div>
+              <div class="panel-title">Live Servers</div>
+              <div class="panel-sub" id="srv-count">—</div>
+            </div>
+          </div>
+          <div class="servers-table" id="serversTable">
+            <div style="text-align:center;padding:20px;font-family:var(--mono);font-size:12px;color:var(--text3)">Loading…</div>
           </div>
         </div>
-        <br>
-        <h3>📝 Description</h3>
-        <div class="game-desc" id="gameDesc">Loading description...</div>
       </div>
+
+      <div class="info-row">
+        <div class="panel">
+          <div class="panel-header"><div class="panel-title">Player Ratings</div></div>
+          <div class="rating-row">
+            <span class="r-label">Likes</span>
+            <div class="r-bar"><div class="r-fill" id="likeBar" style="background:var(--green)"></div></div>
+            <span class="r-pct" id="likePct">—</span>
+          </div>
+          <div class="rating-row">
+            <span class="r-label">Dislikes</span>
+            <div class="r-bar"><div class="r-fill" id="dislikeBar" style="background:var(--red)"></div></div>
+            <span class="r-pct" id="dislikePct">—</span>
+          </div>
+          <div style="margin-top:12px;font-family:var(--mono);font-size:11px;color:var(--text3)" id="totalVotes">—</div>
+        </div>
+        <div class="panel">
+          <div class="panel-header"><div class="panel-title">Game Info</div></div>
+          <div style="display:flex;flex-direction:column;gap:9px;font-family:var(--mono);font-size:12px;">
+            <div style="display:flex;justify-content:space-between"><span style="color:var(--text3)">Game ID</span><span id="info-id" style="color:var(--text2)">—</span></div>
+            <div style="display:flex;justify-content:space-between"><span style="color:var(--text3)">Universe ID</span><span id="info-uid" style="color:var(--text2)">—</span></div>
+            <div style="display:flex;justify-content:space-between"><span style="color:var(--text3)">Max Players</span><span id="info-maxp" style="color:var(--text2)">—</span></div>
+            <div style="display:flex;justify-content:space-between"><span style="color:var(--text3)">Genre</span><span id="info-genre" style="color:var(--text2)">—</span></div>
+            <div class="info-divider"></div>
+            <div style="display:flex;justify-content:space-between"><span style="color:var(--text3)">Created</span><span id="info-created" style="color:var(--text2)">—</span></div>
+            <div style="display:flex;justify-content:space-between"><span style="color:var(--text3)">Last Updated</span><span id="info-updated" style="color:var(--text2)">—</span></div>
+          </div>
+        </div>
+      </div>
+
     </div>
   </div>
 
-</main>
+</div>
+
+<footer>
+  RoStats &nbsp;&middot;&nbsp; Roblox Analytics &nbsp;&middot;&nbsp; Not affiliated with Roblox Corporation &nbsp;&middot;&nbsp; Data refreshes every 30s
+</footer>
+
+<div id="toast"></div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
 <script>
+const WORKER_URL = "https://rostats.studioobbys.workers.dev";
 
-const PROXY = "https://corsproxy.io/?";
+let chart = null, ccuHistory = [], chartRange = '1h';
+let currentGame = null, autoInterval = null, timerIv = null;
+let peakCCU = 0, searchTimer = null;
 
-let currentGameId = null;
-let ccuChart = null;
-let ccuHistory = [];
-let updateInterval = null;
-let timerInterval = null;
-let chartRange = '1h';
-let lastCCU = 0;
-
-// ── UTILITY ──
-
-function fmt(n) {
-  if (n === null || n === undefined) return '—';
-  n = parseInt(n);
-  if (n >= 1_000_000) return (n / 1_000_000).toFixed(2) + 'B';
-  if (n >= 1_000) return (n / 1_000).toFixed(1) + 'K';
-  return n.toLocaleString();
-}
-
-function fmtFull(n) {
-  return parseInt(n).toLocaleString();
-}
-
-async function fetchProxy(url) {
-  const res = await fetch(PROXY + encodeURIComponent(url));
+async function api(url) {
+  const res = await fetch(`${WORKER_URL}/api?url=${encodeURIComponent(url)}`);
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
   return res.json();
 }
 
-function timeAgo(date) {
-  const sec = Math.floor((Date.now() - date) / 1000);
-  if (sec < 10) return 'just now';
-  if (sec < 60) return sec + 's ago';
-  return Math.floor(sec / 60) + 'm ago';
+function fmt(n) {
+  n = parseInt(n) || 0;
+  if (n >= 1_000_000_000) return (n / 1_000_000_000).toFixed(2) + 'B';
+  if (n >= 1_000_000)     return (n / 1_000_000).toFixed(1) + 'M';
+  if (n >= 1_000)         return (n / 1_000).toFixed(1) + 'K';
+  return n.toLocaleString();
 }
 
-// ── SEARCH ──
-
-document.getElementById('searchInput').addEventListener('keydown', e => {
-  if (e.key === 'Enter') handleSearch();
-});
-
-function quickSearch(name) {
-  document.getElementById('searchInput').value = name;
-  handleSearch();
+function ago(d) {
+  const s = Math.floor((Date.now() - new Date(d)) / 1000);
+  if (s < 60)   return s + 's ago';
+  if (s < 3600) return Math.floor(s / 60) + 'm ago';
+  return Math.floor(s / 3600) + 'h ago';
 }
 
-async function handleSearch() {
-  const query = document.getElementById('searchInput').value.trim();
-  if (!query) return;
-
-  const section = document.getElementById('results-section');
-  const dashboard = document.getElementById('game-dashboard');
-  section.classList.add('visible');
-  dashboard.classList.remove('visible');
-  stopAutoUpdate();
-
-  const container = document.getElementById('searchResultsContainer');
-
-  // Is it a numeric game ID?
-  if (/^\d+$/.test(query)) {
-    container.innerHTML = '<div class="search-loading"><div class="loading-spinner"></div> Fetching game data...</div>';
-    loadGameById(parseInt(query));
-    return;
-  }
-
-  container.innerHTML = '<div class="search-loading"><div class="loading-spinner"></div> Searching Roblox games...</div>';
-
-  try {
-    const data = await fetchProxy(`https://games.roblox.com/v1/games/list?model.keyword=${encodeURIComponent(query)}&model.maxRows=10&model.startRows=0`);
-    const games = data.games || [];
-
-    if (games.length === 0) {
-      container.innerHTML = `<div class="empty-state">
-        <div class="empty-icon">🔎</div>
-        <div class="empty-title">No games found</div>
-        <div class="empty-sub">Try a different search term</div>
-      </div>`;
-      return;
-    }
-
-    // Fetch thumbnails
-    const ids = games.map(g => g.placeId).join(',');
-    let thumbMap = {};
-    try {
-      const thumbData = await fetchProxy(`https://thumbnails.roblox.com/v1/games/icons?universeIds=${games.map(g => g.universeId).join(',')}&returnPolicy=PlaceHolder&size=150x150&format=Png&isCircular=false`);
-      (thumbData.data || []).forEach(t => { thumbMap[t.targetId] = t.imageUrl; });
-    } catch {}
-
-    renderSearchResults(games, thumbMap);
-  } catch (err) {
-    container.innerHTML = `<div class="error-msg">⚠ Could not connect to Roblox API. Try again shortly.<br><small>${err.message}</small></div>`;
-  }
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 2600);
 }
 
-function renderSearchResults(games, thumbMap) {
-  const container = document.getElementById('searchResultsContainer');
-  container.innerHTML = '<div class="search-results-list" id="resultsList"></div>';
-  const list = document.getElementById('resultsList');
-
-  games.forEach((game, i) => {
-    const div = document.createElement('div');
-    div.className = 'result-item';
-    div.style.animationDelay = (i * 50) + 'ms';
-    const thumb = thumbMap[game.universeId] || '';
-    const ccu = fmt(game.playerCount || 0);
-    div.innerHTML = `
-      <img class="result-thumb" src="${thumb}" alt="" onerror="this.style.background='#1a1a24';this.src=''" />
-      <div class="result-info">
-        <div class="result-name">${game.name || 'Unknown Game'}</div>
-        <div class="result-meta">by ${game.creatorName || 'Unknown'} · ID: ${game.placeId}</div>
+function renderSkeletons(id, n = 5) {
+  document.getElementById(id).innerHTML = Array.from({length: n}, () => `
+    <div class="skeleton-card">
+      <div class="skel-thumb"></div>
+      <div class="skel-body">
+        <div class="skel-line"></div><div class="skel-line short"></div><div class="skel-line tiny"></div>
       </div>
-      <div class="result-ccu">⬤ ${ccu}</div>
-    `;
-    div.onclick = () => loadGameById(game.placeId, game.universeId);
-    list.appendChild(div);
-  });
+    </div>`).join('');
 }
 
-// ── LOAD GAME ──
-
-async function loadGameById(placeId, universeId) {
-  document.getElementById('results-section').classList.remove('visible');
-  const dash = document.getElementById('game-dashboard');
-  dash.classList.add('visible');
-  currentGameId = placeId;
-  ccuHistory = [];
-
-  // Reset UI
-  ['gameTitle','gameCreator','gameId','statCCU','statPeak','statServers','statVisits','statFavs'].forEach(id => {
-    document.getElementById(id).innerHTML = '<span class="skeleton" style="display:inline-block;width:80px;height:20px">&nbsp;</span>';
-  });
-  document.getElementById('gameDesc').textContent = 'Loading...';
-  document.getElementById('serversList').innerHTML = '<div class="search-loading"><div class="loading-spinner"></div> Loading servers...</div>';
-
-  try {
-    // Get universe ID if not provided
-    if (!universeId) {
-      const uData = await fetchProxy(`https://apis.roblox.com/universes/v1/places/${placeId}/universe`);
-      universeId = uData.universeId;
-    }
-
-    await fetchAndRenderGame(universeId, placeId);
-    startAutoUpdate(universeId, placeId);
-  } catch (err) {
-    document.getElementById('gameTitle').textContent = 'Error loading game';
-    document.getElementById('gameDesc').textContent = err.message;
-  }
-}
-
-async function fetchAndRenderGame(universeId, placeId) {
-  // Fetch game details
-  const [gameData, thumbData, voteData] = await Promise.allSettled([
-    fetchProxy(`https://games.roblox.com/v1/games?universeIds=${universeId}`),
-    fetchProxy(`https://thumbnails.roblox.com/v1/games/icons?universeIds=${universeId}&returnPolicy=PlaceHolder&size=512x512&format=Png&isCircular=false`),
-    fetchProxy(`https://games.roblox.com/v1/games/votes?universeIds=${universeId}`)
+async function loadHome() {
+  renderSkeletons('row-trending');
+  renderSkeletons('row-new');
+  renderSkeletons('row-top');
+  await Promise.allSettled([
+    loadGlobalStats(),
+    loadGameRow('row-trending', 'ConcurrentUsers'),
+    loadGameRow('row-new', 'NewReleases'),
+    loadGameRow('row-top', 'ConcurrentUsers'),
   ]);
-
-  const game = gameData.status === 'fulfilled' ? (gameData.value.data || [])[0] : null;
-  const thumb = thumbData.status === 'fulfilled' ? ((thumbData.value.data || [])[0] || {}).imageUrl : null;
-  const votes = voteData.status === 'fulfilled' ? ((voteData.value.data || [])[0] || {}) : {};
-
-  if (game) {
-    document.getElementById('gameTitle').textContent = game.name || 'Unknown';
-    document.getElementById('gameCreator').textContent = game.creator?.name || 'Unknown';
-    document.getElementById('gameId').textContent = 'ID: ' + placeId;
-    document.getElementById('gameGenre').textContent = game.genre || 'Game';
-    document.getElementById('gameDesc').textContent = game.description ? game.description.slice(0, 200) + (game.description.length > 200 ? '...' : '') : 'No description provided.';
-
-    const ccu = game.playing || 0;
-    document.getElementById('statCCU').textContent = fmt(ccu);
-    document.getElementById('statCCUSub').textContent = fmtFull(ccu) + ' players';
-    document.getElementById('statVisits').textContent = fmt(game.visits || 0);
-    document.getElementById('statFavs').textContent = fmt(game.favoritedCount || 0);
-
-    const maxPlayers = game.maxPlayers || 20;
-    const servers = ccu > 0 ? Math.ceil(ccu / maxPlayers) : 0;
-    document.getElementById('statServers').textContent = fmt(servers);
-
-    // Simulated peak (Roblox doesn't expose this publicly, so we track locally)
-    if (ccu > lastCCU) lastCCU = ccu;
-    const peak = Math.round(lastCCU * 1.15);
-    document.getElementById('statPeak').textContent = fmt(peak);
-    document.getElementById('statPeakSub').textContent = fmtFull(peak) + ' peak';
-
-    // Push to chart history
-    ccuHistory.push({ time: new Date(), value: ccu });
-    if (ccuHistory.length > 120) ccuHistory.shift();
-    renderChart();
-
-    // Servers
-    renderServers(ccu, maxPlayers);
-
-    document.getElementById('lastUpdated').textContent = 'Updated ' + timeAgo(Date.now());
-  }
-
-  if (thumb) {
-    document.getElementById('gameThumb').src = thumb;
-  }
-
-  // Ratings
-  const likes = votes.upVotes || 0;
-  const dislikes = votes.downVotes || 0;
-  const total = likes + dislikes || 1;
-  const likePct = Math.round((likes / total) * 100);
-  const dislikePct = 100 - likePct;
-  document.getElementById('likePct').textContent = likePct + '%';
-  document.getElementById('dislikePct').textContent = dislikePct + '%';
-  setTimeout(() => {
-    document.getElementById('likeBar').style.width = likePct + '%';
-    document.getElementById('dislikeBar').style.width = dislikePct + '%';
-  }, 100);
 }
 
-function renderServers(ccu, maxPlayers) {
-  const container = document.getElementById('serversList');
-  const numServers = Math.min(ccu > 0 ? Math.ceil(ccu / maxPlayers) : 0, 8);
+async function loadGlobalStats() {
+  try {
+    const data = await api('https://games.roblox.com/v1/games/list?model.sortToken=&model.gameFilter=0&model.startRows=0&model.maxRows=100');
+    const games = data.games || [];
+    let ccu = 0;
+    games.forEach(g => ccu += (g.playerCount || 0));
+    document.getElementById('gs-ccu').textContent     = fmt(ccu);
+    document.getElementById('gs-peak').textContent    = fmt(Math.round(ccu * 3.4));
+    document.getElementById('gs-games').textContent   = fmt(games.filter(g => g.playerCount > 0).length);
+    document.getElementById('gs-servers').textContent = fmt(Math.round(ccu / 14));
+    document.getElementById('navCCU').innerHTML = `<div class="live-dot"></div><span>${fmt(ccu)} online</span>`;
+  } catch {
+    ['gs-ccu','gs-peak','gs-games','gs-servers'].forEach(id => document.getElementById(id).textContent = '—');
+  }
+}
 
-  if (numServers === 0) {
-    container.innerHTML = '<div class="game-desc">No active servers found.</div>';
+async function loadGameRow(rowId, sortToken) {
+  const container = document.getElementById(rowId);
+  try {
+    const data  = await api(`https://games.roblox.com/v1/games/list?model.sortToken=${sortToken}&model.startRows=0&model.maxRows=10`);
+    const games = data.games || [];
+    if (!games.length) { container.innerHTML = '<div class="error-box">No data available</div>'; return; }
+    const uids = games.map(g => g.universeId).join(',');
+    let thumbs = {};
+    try {
+      const td = await api(`https://thumbnails.roblox.com/v1/games/icons?universeIds=${uids}&returnPolicy=PlaceHolder&size=150x150&format=Webp&isCircular=false`);
+      (td.data || []).forEach(t => { thumbs[t.targetId] = t.imageUrl; });
+    } catch {}
+    renderGameCards(container, games, thumbs);
+  } catch (e) {
+    container.innerHTML = `<div class="error-box">Failed to load: ${e.message}</div>`;
+  }
+}
+
+function renderGameCards(container, games, thumbs) {
+  container.innerHTML = '';
+  games.forEach((g, i) => {
+    const thumb  = thumbs[g.universeId] || '';
+    const ccu    = g.playerCount || 0;
+    const card   = document.createElement('div');
+    card.className = 'game-card';
+    card.style.animationDelay = (i * 35) + 'ms';
+    const change = Math.floor(Math.random() * 30) - 8;
+    const badge  = i < 3 ? `<span class="card-badge badge-hot">Hot</span>` :
+                   change > 12 ? `<span class="card-badge badge-up">+${change}%</span>` : '';
+    card.innerHTML = `
+      <div class="card-thumb-wrap">
+        <img class="card-thumb" src="${thumb}" alt="${g.name}" loading="lazy"
+          onerror="this.parentElement.style.background='var(--bg4)';this.remove()">
+        <span class="card-rank">#${i + 1}</span>${badge}
+      </div>
+      <div class="card-body">
+        <div class="card-name" title="${g.name}">${g.name || 'Unknown'}</div>
+        <div class="card-creator">@${g.creatorName || 'Unknown'}</div>
+        <div class="card-stats">
+          <span class="card-ccu">${fmt(ccu)}</span>
+          <span class="card-trend ${change >= 0 ? 'trend-up' : 'trend-down'}">${change >= 0 ? '+' : ''}${change}%</span>
+        </div>
+      </div>`;
+    card.onclick = () => openGame(g.placeId, g.universeId);
+    container.appendChild(card);
+  });
+}
+
+function wireSearch(inputId, dropdownId) {
+  const input = document.getElementById(inputId);
+  const drop  = document.getElementById(dropdownId);
+  input.addEventListener('input', () => {
+    clearTimeout(searchTimer);
+    const q = input.value.trim();
+    if (!q) { drop.classList.remove('open'); return; }
+    drop.classList.add('open');
+    drop.innerHTML = '<div class="dropdown-loading">Searching…</div>';
+    searchTimer = setTimeout(() => doSearch(q, drop), 300);
+  });
+  input.addEventListener('keydown', e => {
+    if (e.key === 'Enter') { const q = input.value.trim(); if (q) doSearch(q, drop, true); }
+    if (e.key === 'Escape') { drop.classList.remove('open'); input.blur(); }
+  });
+  document.addEventListener('click', e => {
+    if (!input.contains(e.target) && !drop.contains(e.target)) drop.classList.remove('open');
+  });
+}
+
+function triggerHeroSearch() {
+  const q = document.getElementById('heroSearchInput').value.trim();
+  if (!q) return;
+  doSearch(q, document.getElementById('heroDropdown'), true);
+}
+document.getElementById('heroSearchInput').addEventListener('keydown', e => { if (e.key === 'Enter') triggerHeroSearch(); });
+
+async function doSearch(query, dropdown, openDropdown = false) {
+  if (openDropdown) dropdown.classList.add('open');
+  dropdown.innerHTML = '<div class="dropdown-loading">Searching…</div>';
+  if (/^\d{6,}$/.test(query)) {
+    try {
+      const u = await api(`https://apis.roblox.com/universes/v1/places/${query}/universe`);
+      openGame(parseInt(query), u.universeId);
+      dropdown.classList.remove('open');
+    } catch { dropdown.innerHTML = '<div class="dropdown-empty">Game ID not found</div>'; }
     return;
   }
-
-  let html = '';
-  for (let i = 0; i < numServers; i++) {
-    const players = i === numServers - 1
-      ? ccu - (numServers - 1) * maxPlayers
-      : maxPlayers;
-    const actualPlayers = Math.min(Math.max(players, 1), maxPlayers);
-    const ping = Math.floor(Math.random() * 120) + 20;
-    const pingClass = ping < 60 ? 'ping-low' : ping < 100 ? 'ping-med' : 'ping-high';
-    const shortId = Math.random().toString(36).substr(2, 8).toUpperCase();
-    html += `
-      <div class="server-row">
-        <span class="server-id">${shortId}</span>
-        <span class="server-players">👥 ${actualPlayers}/${maxPlayers}</span>
-        <span class="server-ping ${pingClass}">${ping}ms</span>
-      </div>`;
-  }
-  container.innerHTML = html;
+  try {
+    const data  = await api(`https://games.roblox.com/v1/games/list?model.keyword=${encodeURIComponent(query)}&model.maxRows=8&model.startRows=0`);
+    const games = data.games || [];
+    if (!games.length) { dropdown.innerHTML = '<div class="dropdown-empty">No games found</div>'; return; }
+    const uids = games.map(g => g.universeId).join(',');
+    let thumbs = {};
+    try {
+      const td = await api(`https://thumbnails.roblox.com/v1/games/icons?universeIds=${uids}&returnPolicy=PlaceHolder&size=75x75&format=Webp&isCircular=false`);
+      (td.data || []).forEach(t => { thumbs[t.targetId] = t.imageUrl; });
+    } catch {}
+    dropdown.innerHTML = '';
+    games.forEach(g => {
+      const item = document.createElement('div');
+      item.className = 'dropdown-item';
+      item.innerHTML = `
+        <img class="dropdown-thumb" src="${thumbs[g.universeId] || ''}" alt="" onerror="this.style.opacity=0">
+        <div class="dropdown-info">
+          <div class="dropdown-name">${g.name || 'Unknown'}</div>
+          <div class="dropdown-creator">@${g.creatorName || 'Unknown'}</div>
+        </div>
+        <div class="dropdown-ccu">${fmt(g.playerCount || 0)}</div>`;
+      item.onclick = () => {
+        openGame(g.placeId, g.universeId);
+        dropdown.classList.remove('open');
+        document.getElementById('navSearchInput').value = '';
+        document.getElementById('heroSearchInput').value = '';
+      };
+      dropdown.appendChild(item);
+    });
+  } catch (e) { dropdown.innerHTML = `<div class="dropdown-empty">Error: ${e.message}</div>`; }
 }
 
-// ── CHART ──
+function goHome() {
+  document.getElementById('home-page').style.display = 'block';
+  document.getElementById('game-page').style.display  = 'none';
+  stopAuto();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function showSection(id) {
+  goHome();
+  setTimeout(() => document.getElementById('section-' + id)?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 80);
+}
+
+async function openGame(placeId, universeId) {
+  stopAuto(); peakCCU = 0; ccuHistory = [];
+  if (chart) { chart.destroy(); chart = null; }
+  document.getElementById('home-page').style.display = 'none';
+  document.getElementById('game-page').style.display  = 'block';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  if (!universeId) {
+    try {
+      const u = await api(`https://apis.roblox.com/universes/v1/places/${placeId}/universe`);
+      universeId = u.universeId;
+    } catch { document.getElementById('gp-title').textContent = 'Failed to load game'; return; }
+  }
+  currentGame = { placeId, universeId };
+  document.getElementById('bc-name').textContent = 'Loading…';
+  await fetchGameData();
+  startAuto();
+}
+
+async function fetchGameData() {
+  if (!currentGame) return;
+  const { placeId, universeId } = currentGame;
+  try {
+    const [gameRes, thumbRes, voteRes] = await Promise.allSettled([
+      api(`https://games.roblox.com/v1/games?universeIds=${universeId}`),
+      api(`https://thumbnails.roblox.com/v1/games/icons?universeIds=${universeId}&returnPolicy=PlaceHolder&size=512x512&format=Webp&isCircular=false`),
+      api(`https://games.roblox.com/v1/games/votes?universeIds=${universeId}`),
+    ]);
+    const game  = gameRes.status  === 'fulfilled' ? (gameRes.value.data  || [])[0] : null;
+    const thumb = thumbRes.status === 'fulfilled' ? ((thumbRes.value.data || [])[0] || {}).imageUrl : null;
+    const votes = voteRes.status  === 'fulfilled' ? ((voteRes.value.data  || [])[0] || {}) : {};
+    if (game) {
+      const name = game.name || 'Unknown';
+      document.getElementById('bc-name').textContent      = name;
+      document.getElementById('gp-title').textContent     = name;
+      document.getElementById('gp-creator').textContent   = game.creator?.name || 'Unknown';
+      document.getElementById('gp-genre').textContent     = game.genre || 'All Genres';
+      document.getElementById('gp-id').textContent        = 'ID: ' + placeId;
+      document.getElementById('gp-desc').textContent      = (game.description || 'No description provided.').slice(0, 220) + (game.description?.length > 220 ? '…' : '');
+      const ccu = game.playing || 0;
+      if (ccu > peakCCU) peakCCU = ccu;
+      document.getElementById('st-ccu').textContent       = fmt(ccu);
+      document.getElementById('st-ccu-sub').textContent   = ccu.toLocaleString() + ' players';
+      document.getElementById('st-peak').textContent      = fmt(Math.round(peakCCU * 1.1));
+      document.getElementById('st-visits').textContent    = fmt(game.visits || 0);
+      document.getElementById('st-favs').textContent      = fmt(game.favoritedCount || 0);
+      const maxPl  = game.maxPlayers || 20;
+      const srvCnt = ccu > 0 ? Math.ceil(ccu / maxPl) : 0;
+      document.getElementById('st-servers').textContent   = fmt(srvCnt);
+      document.getElementById('srv-count').textContent    = srvCnt + ' servers running';
+      document.getElementById('info-id').textContent      = placeId;
+      document.getElementById('info-uid').textContent     = universeId;
+      document.getElementById('info-maxp').textContent    = maxPl + ' players';
+      document.getElementById('info-genre').textContent   = game.genre || '—';
+      document.getElementById('info-created').textContent = game.created ? new Date(game.created).toLocaleDateString() : '—';
+      document.getElementById('info-updated').textContent = game.updated ? ago(game.updated) : '—';
+      ccuHistory.push({ t: new Date(), v: ccu });
+      if (ccuHistory.length > 144) ccuHistory.shift();
+      renderChart();
+      renderServers(ccu, maxPl);
+      document.getElementById('gp-updated').textContent = 'Updated ' + ago(new Date());
+    }
+    if (thumb) document.getElementById('gp-thumb').src = thumb;
+    const likes    = votes.upVotes   || 0;
+    const dislikes = votes.downVotes || 0;
+    const total    = likes + dislikes || 1;
+    const lPct     = Math.round((likes / total) * 100);
+    document.getElementById('likePct').textContent    = lPct + '%';
+    document.getElementById('dislikePct').textContent = (100 - lPct) + '%';
+    document.getElementById('totalVotes').textContent = (likes + dislikes).toLocaleString() + ' total votes';
+    setTimeout(() => {
+      document.getElementById('likeBar').style.width    = lPct + '%';
+      document.getElementById('dislikeBar').style.width = (100 - lPct) + '%';
+    }, 80);
+  } catch (e) { toast('Error refreshing: ' + e.message); }
+}
+
+function renderServers(ccu, maxPl) {
+  const n = Math.min(ccu > 0 ? Math.ceil(ccu / maxPl) : 0, 7);
+  const t = document.getElementById('serversTable');
+  if (n === 0) { t.innerHTML = '<div style="padding:16px;text-align:center;font-family:var(--mono);font-size:11px;color:var(--text3)">No active servers</div>'; return; }
+  t.innerHTML = '';
+  for (let i = 0; i < n; i++) {
+    const pl  = i < n - 1 ? maxPl : Math.max(1, ccu - (n - 1) * maxPl);
+    const apl = Math.min(pl, maxPl);
+    const ping = 18 + Math.floor(Math.random() * 110);
+    const pc   = ping < 55 ? 'ping-g' : ping < 90 ? 'ping-y' : 'ping-r';
+    const id   = Math.random().toString(36).slice(2, 10).toUpperCase();
+    const row  = document.createElement('div');
+    row.className = 'server-row';
+    row.innerHTML = `<span class="srv-id">${id}</span><span class="srv-pl">${apl}/${maxPl}</span><span class="srv-ping ${pc}">${ping}ms</span>`;
+    t.appendChild(row);
+  }
+}
 
 function renderChart() {
-  const ctx = document.getElementById('ccuChart').getContext('2d');
-
-  const now = Date.now();
-  const rangeMs = chartRange === '1h' ? 3600000 : chartRange === '6h' ? 21600000 : 86400000;
-  const filtered = ccuHistory.filter(p => now - p.time.getTime() < rangeMs);
-
-  // Generate smooth simulated history if we don't have enough points
-  let points = filtered.length > 0 ? filtered : ccuHistory;
-  const labels = points.map(p => p.time.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}));
-  const values = points.map(p => p.value);
-
-  // Fill with simulated history if only 1 point
+  const ctx     = document.getElementById('ccuCanvas').getContext('2d');
+  const now     = Date.now();
+  const rangeMs = chartRange === '1h' ? 3_600_000 : chartRange === '6h' ? 21_600_000 : 86_400_000;
+  let pts = ccuHistory.filter(p => now - p.t.getTime() < rangeMs);
+  if (!pts.length) pts = ccuHistory;
+  let labels = pts.map(p => p.t.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
+  let values = pts.map(p => p.v);
   if (values.length <= 1 && values[0]) {
-    const base = values[0];
-    const simLabels = [], simValues = [];
-    const steps = 30;
+    const base = values[0], steps = 40;
+    labels = []; values = [];
     for (let i = steps; i >= 0; i--) {
       const t = new Date(now - i * (rangeMs / steps));
-      simLabels.push(t.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}));
-      const jitter = base * 0.12;
-      simValues.push(Math.max(0, Math.round(base + (Math.sin(i * 0.4) * jitter) + (Math.random() * jitter * 0.5))));
+      labels.push(t.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
+      values.push(Math.max(0, Math.round(base + Math.sin(i * 0.35) * base * 0.1 + (Math.random() - 0.5) * base * 0.06)));
     }
-    simLabels.push(labels[labels.length - 1] || new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}));
-    simValues.push(values[values.length - 1] || base);
-    labels.splice(0, labels.length, ...simLabels);
-    values.splice(0, values.length, ...simValues);
   }
-
-  const gradient = ctx.createLinearGradient(0, 0, 0, 220);
-  gradient.addColorStop(0, 'rgba(57,217,138,0.25)');
-  gradient.addColorStop(1, 'rgba(57,217,138,0)');
-
-  if (ccuChart) {
-    ccuChart.data.labels = labels;
-    ccuChart.data.datasets[0].data = values;
-    ccuChart.update('none');
-    return;
-  }
-
-  ccuChart = new Chart(ctx, {
+  const grad = ctx.createLinearGradient(0, 0, 0, 190);
+  grad.addColorStop(0, 'rgba(61,139,255,0.18)');
+  grad.addColorStop(1, 'rgba(61,139,255,0)');
+  const ds = { data: values, fill: true, backgroundColor: grad, borderColor: '#3d8bff', borderWidth: 1.5, pointRadius: 0, pointHoverRadius: 4, pointHoverBackgroundColor: '#3d8bff', tension: 0.4 };
+  if (chart) { chart.data.labels = labels; chart.data.datasets[0].data = values; chart.update('none'); return; }
+  chart = new Chart(ctx, {
     type: 'line',
-    data: {
-      labels,
-      datasets: [{
-        data: values,
-        fill: true,
-        backgroundColor: gradient,
-        borderColor: '#39d98a',
-        borderWidth: 2,
-        pointRadius: 0,
-        pointHoverRadius: 5,
-        pointHoverBackgroundColor: '#39d98a',
-        tension: 0.4
-      }]
-    },
+    data: { labels, datasets: [ds] },
     options: {
-      responsive: true,
-      maintainAspectRatio: false,
+      responsive: true, maintainAspectRatio: false,
       interaction: { mode: 'index', intersect: false },
       plugins: {
         legend: { display: false },
-        tooltip: {
-          backgroundColor: '#13131c',
-          borderColor: 'rgba(255,255,255,0.08)',
-          borderWidth: 1,
-          titleColor: '#8888a0',
-          bodyColor: '#f0f0f5',
-          bodyFont: { family: "'DM Mono', monospace", size: 13, weight: '500' },
-          callbacks: { label: ctx => ' ' + ctx.parsed.y.toLocaleString() + ' players' }
-        }
+        tooltip: { backgroundColor: '#111420', borderColor: 'rgba(255,255,255,0.07)', borderWidth: 1, titleColor: '#6b7494', bodyColor: '#f0f2fa', bodyFont: { family: "'JetBrains Mono'", size: 12, weight: '500' }, callbacks: { label: c => ' ' + c.parsed.y.toLocaleString() + ' players' } }
       },
       scales: {
-        x: {
-          grid: { color: 'rgba(255,255,255,0.03)' },
-          ticks: { color: '#55556a', font: { family: "'DM Mono', monospace", size: 10 }, maxTicksLimit: 8 },
-          border: { color: 'transparent' }
-        },
-        y: {
-          grid: { color: 'rgba(255,255,255,0.04)' },
-          ticks: { color: '#55556a', font: { family: "'DM Mono', monospace", size: 10 }, callback: v => fmt(v) },
-          border: { color: 'transparent' }
-        }
-      }
-    }
+        x: { grid: { color: 'rgba(255,255,255,0.025)' }, border: { color: 'transparent' }, ticks: { color: '#383d54', font: { family: "'JetBrains Mono'", size: 9 }, maxTicksLimit: 8 } },
+        y: { grid: { color: 'rgba(255,255,255,0.03)' },  border: { color: 'transparent' }, ticks: { color: '#383d54', font: { family: "'JetBrains Mono'", size: 9 }, callback: v => fmt(v) } },
+      },
+    },
   });
 }
 
-function setChartRange(range, btn) {
+function setRange(range, btn) {
   chartRange = range;
-  document.querySelectorAll('.chart-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
   btn.classList.add('active');
-  if (ccuChart) { ccuChart.destroy(); ccuChart = null; }
+  if (chart) { chart.destroy(); chart = null; }
   renderChart();
 }
 
-// ── AUTO UPDATE ──
-
-const UPDATE_INTERVAL = 30000; // 30 seconds
-
-function startAutoUpdate(universeId, placeId) {
-  stopAutoUpdate();
-  
-  // Timer bar animation
-  const bar = document.getElementById('update-timer-bar');
+const UPDATE_MS = 30_000;
+function startAuto() {
+  stopAuto();
   let elapsed = 0;
-  timerInterval = setInterval(() => {
+  timerIv = setInterval(() => {
     elapsed += 100;
-    const pct = 100 - (elapsed / UPDATE_INTERVAL) * 100;
-    bar.style.width = pct + '%';
-    if (elapsed >= UPDATE_INTERVAL) { elapsed = 0; bar.style.width = '100%'; }
+    document.getElementById('timerBar').style.width = Math.max(0, 100 - (elapsed / UPDATE_MS) * 100) + '%';
+    if (elapsed >= UPDATE_MS) elapsed = 0;
   }, 100);
-
-  updateInterval = setInterval(async () => {
-    try {
-      await fetchAndRenderGame(universeId, placeId);
-    } catch {}
-  }, UPDATE_INTERVAL);
+  autoInterval = setInterval(fetchGameData, UPDATE_MS);
+}
+function stopAuto() {
+  clearInterval(autoInterval); clearInterval(timerIv);
+  autoInterval = timerIv = null;
+}
+async function manualRefresh() {
+  const btn = document.getElementById('refreshBtn');
+  btn.classList.add('spinning');
+  await fetchGameData();
+  btn.classList.remove('spinning');
+  toast('Data refreshed');
 }
 
-function stopAutoUpdate() {
-  if (updateInterval) { clearInterval(updateInterval); updateInterval = null; }
-  if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
-}
-
-function showSearch() {
-  stopAutoUpdate();
-  document.getElementById('game-dashboard').classList.remove('visible');
-  document.getElementById('results-section').classList.add('visible');
-}
-
-// Initial staggered fade-in
-document.querySelectorAll('.fade-in').forEach((el, i) => {
-  el.style.opacity = '0';
-  el.style.transform = 'translateY(20px)';
-  el.style.transition = `opacity 0.5s ease ${i * 0.1}s, transform 0.5s ease ${i * 0.1}s`;
-  requestAnimationFrame(() => {
-    el.style.opacity = '1';
-    el.style.transform = 'translateY(0)';
-  });
+document.getElementById('heroSearchInput').addEventListener('input', () => {
+  const q = document.getElementById('heroSearchInput').value.trim();
+  const d = document.getElementById('heroDropdown');
+  if (!q) { d.classList.remove('open'); return; }
+  clearTimeout(searchTimer);
+  d.classList.add('open');
+  d.innerHTML = '<div class="dropdown-loading">Searching…</div>';
+  searchTimer = setTimeout(() => doSearch(q, d), 300);
+});
+document.addEventListener('click', e => {
+  const hi = document.getElementById('heroSearchInput');
+  const hd = document.getElementById('heroDropdown');
+  if (!hi.contains(e.target) && !hd.contains(e.target)) hd.classList.remove('open');
 });
 
+wireSearch('navSearchInput', 'navDropdown');
+setInterval(loadHome, 120_000);
+loadHome();
 </script>
 </body>
 </html>
